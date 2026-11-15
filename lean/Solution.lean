@@ -5,6 +5,7 @@ import Mathlib
 
 Main results:
 * `prime_ending`: every prime `p > 5` satisfies `p % 10 ∈ {1, 3, 7, 9}`.
+* `prime_mod30`: every prime `p > 5` is coprime to 30 (the mod-30 wheel loses no prime).
 * `removed_not_prime`: no `n > 5` with `n % 10 ∈ {0, 2, 4, 5, 6, 8}` is prime.
 * `smallest_factor_le_sqrt`: a composite `n` has `minFac n ^ 2 ≤ n`, so sieving by primes up to
   `√x` suffices.
@@ -26,6 +27,21 @@ theorem prime_ending (p : ℕ) (hp : p.Prime) (h5 : 5 < p) :
   have h2 : ¬ 2 ∣ p := by
     intro hd
     rcases hp.eq_one_or_self_of_dvd 2 hd with h | h <;> omega
+  have h5' : ¬ 5 ∣ p := by
+    intro hd
+    rcases hp.eq_one_or_self_of_dvd 5 hd with h | h <;> omega
+  omega
+
+/-- The mod-30 wheel loses no prime: every prime above 5 is coprime to 30. -/
+theorem prime_mod30 (p : ℕ) (hp : p.Prime) (h5 : 5 < p) :
+    p % 30 = 1 ∨ p % 30 = 7 ∨ p % 30 = 11 ∨ p % 30 = 13 ∨
+      p % 30 = 17 ∨ p % 30 = 19 ∨ p % 30 = 23 ∨ p % 30 = 29 := by
+  have h2 : ¬ 2 ∣ p := by
+    intro hd
+    rcases hp.eq_one_or_self_of_dvd 2 hd with h | h <;> omega
+  have h3 : ¬ 3 ∣ p := by
+    intro hd
+    rcases hp.eq_one_or_self_of_dvd 3 hd with h | h <;> omega
   have h5' : ¬ 5 ∣ p := by
     intro hd
     rcases hp.eq_one_or_self_of_dvd 5 hd with h | h <;> omega

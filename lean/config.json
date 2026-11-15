@@ -3,6 +3,7 @@
     "solution_module": "Solution",
     "theorem_names": [
         "prime_ending",
+        "prime_mod30",
         "removed_not_prime",
         "smallest_factor_le_sqrt",
         "candidate_prime_above",

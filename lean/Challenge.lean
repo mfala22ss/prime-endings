@@ -3,6 +3,10 @@ import Mathlib
 theorem prime_ending (p : ℕ) (hp : p.Prime) (h5 : 5 < p) :
     p % 10 = 1 ∨ p % 10 = 3 ∨ p % 10 = 7 ∨ p % 10 = 9 := sorry
 
+theorem prime_mod30 (p : ℕ) (hp : p.Prime) (h5 : 5 < p) :
+    p % 30 = 1 ∨ p % 30 = 7 ∨ p % 30 = 11 ∨ p % 30 = 13 ∨
+      p % 30 = 17 ∨ p % 30 = 19 ∨ p % 30 = 23 ∨ p % 30 = 29 := sorry
+
 theorem removed_not_prime (n : ℕ) (h5 : 5 < n)
     (hd : n % 10 = 0 ∨ n % 10 = 2 ∨ n % 10 = 4 ∨ n % 10 = 5 ∨ n % 10 = 6 ∨ n % 10 = 8) :
     ¬ n.Prime := sorry

@@ -4,6 +4,8 @@
 
 Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact and follows it as far as it goes: how many primes the 40% of numbers with those endings contain, how fast that share falls, how the four endings compare, how primes ending in 1 are spaced, and what it takes to get from the 40% down to the primes alone. Every number is computed and checked against independent software. The central facts are proved in Lean 4 and checked by the Lean kernel.
 
+**Step-by-step account of everything done, with results:** [WALKTHROUGH.md](WALKTHROUGH.md) ([PDF](docs/Walkthrough.pdf)).
+
 > **What this is and is not.** Every result here is already known to mathematics, most of it for over a century (see [Prior work](#prior-work)). This is not a new discovery. It is a careful rediscovery: each claim is computed from scratch, tested against ground truth, audited, and where possible formally proved.
 
 ---
@@ -131,6 +133,7 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and th
 | Theorem | Statement in plain words |
 |------------------------|--------------------------------------------------------|
 | `prime_ending` | Every prime above 5 ends in 1, 3, 7 or 9. |
+| `prime_mod30` | Every prime above 5 leaves remainder 1, 7, 11, 13, 17, 19, 23 or 29 when divided by 30: the mod-30 wheel loses no prime. Added after step 8; Comparator run pending. |
 | `removed_not_prime` | No number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime. The removed 60% holds no primes above 5. |
 | `smallest_factor_le_sqrt` | A composite number's smallest prime factor, squared, is at most the number. This is why the sieve may stop at the square root. |
 | `candidate_prime_above` | For every n there is a prime above n ending in 1, 3, 7 or 9. So the 40% holds infinitely many primes. |
