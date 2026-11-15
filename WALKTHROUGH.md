@@ -215,7 +215,7 @@ The boost is m divided by the number of kept residues: 2.5, 3.75, 4.375 and 4.81
 
 The largest model gap in the full Python table is 1.1% (relative), inside the 2% rule.
 
-**Status.** PENDING: not yet run on Comparator Live (run 5).
+**Status.** The benchmark ran on Comparator Live in run 5 and printed ALL 4 CHECKS PASSED; every candidate and prime count equals the Python values above, and every precision agrees to six decimals. The run as a whole failed on an unrelated proof (`prime_mod30`), fixed for run 6.
 
 ---
 
@@ -245,7 +245,8 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | 2 | Built-in "There Are Infinitely Many Primes" | L2 version | Passed |
 | 3 | Built-in "There Are Infinitely Many Primes" | L3 version, first try | Failed: a documentation comment placed before an `#eval` line (not a proof error) |
 | 4 | Built-in "There Are Infinitely Many Primes" | L3 version, fixed (SHA-256 57b52a1d...) | Passed; the `#eval` cross-check printed `true` |
-| 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` and `wheelBenchmark` | **Not yet run** |
+| 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` and `wheelBenchmark` | Failed: the last step of `prime_mod30` (`omega` cannot combine "not divisible by 2, 3, 5" into the 8 remainders mod 30; Lean's `omega` is incomplete for this). The benchmark ran in the same run: ALL 4 CHECKS PASSED, every count equal to the Python values |
+| 6 | Built-in "There Are Infinitely Many Primes" | L4 fixed: `prime_mod30` splits into the 30 possible remainders; the fix was compiled first with a local Lean 4.35 | **Not yet run** |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
 
@@ -253,7 +254,7 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 
 ## What is still open
 
-* `prime_mod30` and the Lean benchmark must be run on Comparator (run 5).
+* The fixed `prime_mod30` must be run on Comparator (run 6).
 * The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.
 * Lean's reports above 3.317 x 10^24 list probable primes (Miller-Rabin bound of Sorenson and Webster, 2017).

@@ -45,7 +45,17 @@ theorem prime_mod30 (p : ℕ) (hp : p.Prime) (h5 : 5 < p) :
   have h5' : ¬ 5 ∣ p := by
     intro hd
     rcases hp.eq_one_or_self_of_dvd 5 hd with h | h <;> omega
-  omega
+  -- `omega` alone cannot combine the three facts mod 30, so split on the remainder.
+  have e2 : p % 30 % 2 = p % 2 := Nat.mod_mod_of_dvd p (by decide)
+  have e3 : p % 30 % 3 = p % 3 := Nat.mod_mod_of_dvd p (by decide)
+  have e5 : p % 30 % 5 = p % 5 := Nat.mod_mod_of_dvd p (by decide)
+  have hlt : p % 30 < 30 := Nat.mod_lt p (by decide)
+  generalize p % 30 = r at e2 e3 e5 hlt ⊢
+  match r, hlt with
+  | 0, _ | 1, _ | 2, _ | 3, _ | 4, _ | 5, _ | 6, _ | 7, _ | 8, _ | 9, _
+  | 10, _ | 11, _ | 12, _ | 13, _ | 14, _ | 15, _ | 16, _ | 17, _ | 18, _ | 19, _
+  | 20, _ | 21, _ | 22, _ | 23, _ | 24, _ | 25, _ | 26, _ | 27, _ | 28, _ | 29, _ => omega
+  | _ + 30, _ => omega
 
 theorem removed_not_prime (n : ℕ) (h5 : 5 < n)
     (hd : n % 10 = 0 ∨ n % 10 = 2 ∨ n % 10 = 4 ∨ n % 10 = 5 ∨ n % 10 = 6 ∨ n % 10 = 8) :
