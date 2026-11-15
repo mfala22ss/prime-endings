@@ -178,6 +178,47 @@ The boost is m divided by the number of kept residues: 2.5, 3.75, 4.375 and 4.81
 
 ---
 
+## Step 9. The same benchmark inside Lean, with pass/fail rules
+
+**Question.** Can one run on Comparator Live check both the proofs and the benchmark?
+
+**Built.** A `wheelBenchmark` section in [`lean/Solution.lean`](lean/Solution.lean), run by `#eval wheelBenchmark`.
+
+**What it does.**
+
+1. Builds the ground truth with `plainSieve`, a sieve over all numbers that uses no wheel, so it does not depend on the filter being tested.
+2. For the wheels mod 10, 30, 210 and 2310 at x = 10^4, 10^5 and 10^6, counts candidates, primes among them, and all primes above the wheel's own primes.
+3. Applies four rules fixed before running, and prints PASS or FAIL for each:
+
+| Rule | Passes when |
+|---|---|
+| Recall | no prime above the wheel's own primes is missed, at every wheel and x |
+| Falling precision | precision drops from 10^4 to 10^5 to 10^6 for every wheel |
+| Model | precision is within 2% (relative) of boost / (ln x − 1) everywhere |
+| Kept share | at 10^6 the kept share is within 0.1 points of φ(m) / m |
+
+**How to know it passed.** Two separate signals, both needed:
+
+* Comparator shows **Success**: every proof in the file compiled, and `InfinitudeOfPrimes` is certified.
+* The output of `#eval wheelBenchmark` ends with **ALL 4 CHECKS PASSED**, and its numbers match the expected values below, computed independently in Python.
+
+**Expected values (Python, numpy sieve).**
+
+| Wheel | x | Candidates | Primes in them | Precision | Model | Missed |
+|---|---:|---:|---:|---:|---:|---:|
+| mod 10 | 10,000 | 3,998 | 1,226 | 30.665% | 30.449% | 0 |
+| mod 10 | 1,000,000 | 399,998 | 78,495 | 19.624% | 19.508% | 0 |
+| mod 30 | 10,000 | 2,665 | 1,226 | 46.004% | 45.674% | 0 |
+| mod 30 | 1,000,000 | 266,665 | 78,495 | 29.436% | 29.261% | 0 |
+| mod 210 | 1,000,000 | 228,570 | 78,494 | 34.341% | 34.138% | 0 |
+| mod 2310 | 1,000,000 | 207,791 | 78,493 | 37.775% | 37.552% | 0 |
+
+The largest model gap in the full Python table is 1.1% (relative), inside the 2% rule.
+
+**Status.** PENDING: not yet run on Comparator Live (run 5).
+
+---
+
 ## The Lean proofs, in the order they were built
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
@@ -204,7 +245,7 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | 2 | Built-in "There Are Infinitely Many Primes" | L2 version | Passed |
 | 3 | Built-in "There Are Infinitely Many Primes" | L3 version, first try | Failed: a documentation comment placed before an `#eval` line (not a proof error) |
 | 4 | Built-in "There Are Infinitely Many Primes" | L3 version, fixed (SHA-256 57b52a1d...) | Passed; the `#eval` cross-check printed `true` |
-| 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` | **Not yet run** |
+| 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` and `wheelBenchmark` | **Not yet run** |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
 
@@ -212,7 +253,7 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 
 ## What is still open
 
-* `prime_mod30` must be run on Comparator (run 5).
+* `prime_mod30` and the Lean benchmark must be run on Comparator (run 5).
 * The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.
 * Lean's reports above 3.317 x 10^24 list probable primes (Miller-Rabin bound of Sorenson and Webster, 2017).

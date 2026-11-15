@@ -415,6 +415,66 @@ def mersenneReport (record : ℕ) : IO Unit := do
   IO.println s!"Expected Mersenne primes in between (heuristic): {expectedMersenne record firstBig}"
   IO.println s!"Mersenne prime exponents below 1300: {small}"
 
+/-! ## Wheel benchmark: precision, recall and pass/fail checks (computation, not proof) -/
+
+/-- Plain sieve of Eratosthenes over all numbers, using no wheel: the ground truth. -/
+def plainSieve (x : ℕ) : Array Bool := Id.run do
+  let mut s : Array Bool := Array.ofFn (n := x + 1) fun i => decide (2 ≤ i.val)
+  let mut p := 2
+  while decide (p * p ≤ x) do
+    if s[p]! then
+      let mut m := p * p
+      while decide (m ≤ x) do
+        s := s.set! m false
+        m := m + p
+    p := p + 1
+  return s
+
+/-- For the wheel mod `m` on `(big, x]`: candidates, primes among them, and all primes. -/
+def wheelCounts (m big x : ℕ) (s : Array Bool) : ℕ × ℕ × ℕ := Id.run do
+  let mut kept := 0
+  let mut primesKept := 0
+  let mut primesAll := 0
+  for n in [big + 1:x + 1] do
+    let isP := s[n]!
+    let inWheel := Nat.gcd n m == 1
+    if inWheel then kept := kept + 1
+    if isP then primesAll := primesAll + 1
+    if isP && inWheel then primesKept := primesKept + 1
+  return (kept, primesKept, primesAll)
+
+def wheelBenchmark : IO Unit := do
+  let limits := [10000, 100000, 1000000]
+  let s := plainSieve 1000000
+  let wheels : List (ℕ × ℕ) := [(10, 5), (30, 5), (210, 7), (2310, 11)]
+  let mut recallOk := true
+  let mut fallsOk := true
+  let mut modelOk := true
+  let mut shareOk := true
+  IO.println "Wheel | x | kept % | candidates | primes in them | precision % | model % | recall % | missed"
+  for (m, big) in wheels do
+    let residues := ((List.range m).filter fun r => Nat.gcd r m == 1).length
+    let boost := m.toFloat / residues.toFloat
+    let mut prev : Float := 101
+    for x in limits do
+      let (kept, pk, pa) := wheelCounts m big x s
+      let prec := pct pk kept
+      let model := 100 * boost / (lnNat x - 1)
+      IO.println s!"mod {m} | {x} | {pct kept x} | {kept} | {pk} | {prec} | {model} | {pct pk pa} | {pa - pk}"
+      if pk != pa then recallOk := false
+      if !(decide (prec < prev)) then fallsOk := false
+      if !(decide (Float.abs (prec - model) / model < 0.02)) then modelOk := false
+      if x == 1000000 && !(decide (Float.abs (pct kept x - pct residues m) < 0.1)) then
+        shareOk := false
+      prev := prec
+  let verdict := fun (ok : Bool) => if ok then "PASS" else "FAIL"
+  IO.println s!"[{verdict recallOk}] Recall: no prime above the wheel's primes is ever missed"
+  IO.println s!"[{verdict fallsOk}] Precision falls as x grows, for every wheel"
+  IO.println s!"[{verdict modelOk}] Precision within 2% of boost / (ln x - 1) everywhere"
+  IO.println s!"[{verdict shareOk}] Kept share at 10^6 within 0.1 points of phi(m) / m"
+  IO.println (if recallOk && fallsOk && modelOk && shareOk then "ALL 4 CHECKS PASSED"
+    else "AT LEAST ONE CHECK FAILED")
+
 /-! ## Run -/
 
 def rangeStart : ℕ := 10 ^ 28
@@ -426,3 +486,4 @@ def blocks     : ℕ := 10
 
 #eval report rangeStart rangeEnd blocks
 #eval mersenneReport 136279841
+#eval wheelBenchmark
