@@ -1,0 +1,14 @@
+{
+    "challenge_module": "Challenge",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "prime_ending",
+        "removed_not_prime",
+        "smallest_factor_le_sqrt",
+        "candidate_prime_above",
+        "density_factor",
+        "prime_97",
+        "not_prime_91"
+    ],
+    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

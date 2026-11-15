@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+.lake/
+.DS_Store
+_Prime_Endings.typ
