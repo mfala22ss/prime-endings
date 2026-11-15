@@ -58,6 +58,7 @@ The project grew one question at a time. Each step has its own script in [`pytho
 | 5 | How are primes ending in 1 spaced? | Average spacing is exactly 4 ln x (82.69 near 10^9). Spacings divisible by 30 are strongly favoured (44.5% of gaps against 29% under a no-pattern model), as Hardy and Littlewood predicted. |
 | 6 | Sieving the 40% by 3, 7, 11, ... up to the square root of x: what is left? | Exactly the primes, verified number by number. Each small prime p removes 1/p of what is left. |
 | 7 | Is all of the above code actually correct? | An audit with 13 checks against independent ground truth. 13 of 13 pass. |
+| 8 | Precision, recall, and bigger wheels (mod 30, 210, 2310)? | Recall is 100% for every wheel. Precision at 10^8 rises from 14.4% (mod 10) to 21.6% (mod 30) and 27.7% (mod 2310), matching boost / (ln x - 1). Testing only candidates near 10^12 is just 1.1 to 1.2 times faster, because a primality test already discards multiples of 2, 3, 5 almost instantly. |
 
 A Lean 4 file then proves the central facts formally (status: ESTABLISHED, kernel-checked on Comparator Live with Lean v4.36; see [The Lean proofs](#the-lean-proofs)).
 
@@ -233,6 +234,7 @@ Two runs were made on Comparator Live:
 | `steps/step5_ending1_spacing.py` | Gaps between primes ending in 1 near 10^9 against Hardy-Littlewood | 4 s |
 | `steps/step6_sieve_the_40.py` | Sieves the 40% prime by prime to 10^8 and confirms only primes remain | 2 s |
 | `steps/step7_audit.py` | 13 checks of the code and results against independent ground truth | 5 s |
+| `steps/step8_precision_recall_wheels.py` | Precision, recall and timing for wheels mod 10, 30, 210, 2310 | 12 s |
 | `make_prime_tables.py` | Writes `data/primes_40pct_up_to_1e6.csv` and `data/breakdown_by_ending.csv` | 1 min |
 | `extras/density_models.py` | Compares fitted models with li(x), Riemann's R(x) and up to 1,000 zeta-zero waves | 6 s |
 | `extras/legendre_endings.py` | Refits Legendre's 1808 constant from density data; models the bias between endings | 5 s |
