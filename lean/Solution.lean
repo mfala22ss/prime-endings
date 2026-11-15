@@ -8,11 +8,15 @@ Main results:
 * `removed_not_prime`: no `n > 5` with `n % 10 ∈ {0, 2, 4, 5, 6, 8}` is prime.
 * `smallest_factor_le_sqrt`: a composite `n` has `minFac n ^ 2 ≤ n`, so sieving by primes up to
   `√x` suffices.
+* `survives_iff`, `mem_primesSpec`: the sieve rule on the 40% keeps exactly the primes above 5,
+  and the reference sieve `primesSpec x` lists exactly the primes up to `x`.
+* `infinitely_many_ending`: infinitely many primes end in each of 1, 3, 7 and 9 (Dirichlet).
 
 Computation: `report a b g` lists the primes in `[a, b]` together with summary statistics.
 Windows with `√b ≤ 2·10⁶` are sieved exactly. Larger windows are pre-sieved by all primes up to
 `2·10⁶` and the survivors are tested with Miller-Rabin on the first 20 prime bases; this is
-deterministic for `n < 3.317·10²⁴` (Sorenson-Webster, 2015) and probabilistic above it.
+deterministic for `n < ψ₁₃ = 3,317,044,064,679,887,385,961,981` (Sorenson and Webster,
+Math. Comp. 2017) and probabilistic above it.
 -/
 
 /-! ## Theorems -/
@@ -55,6 +59,72 @@ theorem candidate_prime_above (n : ℕ) :
     have h3 := (Nat.dvd_add_right h2).mp hdvd
     exact hp.one_lt.ne' (Nat.dvd_one.mp h3)
   exact ⟨_, hp, by omega, prime_ending _ hp (by omega)⟩
+
+/-- Dirichlet's theorem for the four endings: for each `d ∈ {1, 3, 7, 9}` there are infinitely
+    many primes ending in `d`. -/
+theorem infinitely_many_ending (d : ℕ) (hd : d = 1 ∨ d = 3 ∨ d = 7 ∨ d = 9) (n : ℕ) :
+    ∃ p > n, p.Prime ∧ p % 10 = d := by
+  have hcop : d.Coprime 10 := by rcases hd with rfl | rfl | rfl | rfl <;> decide
+  obtain ⟨p, hpn, hp, hmod⟩ := Nat.forall_exists_prime_gt_and_modEq n (q := 10) (by norm_num) hcop
+  have hd10 : d % 10 = d := by rcases hd with rfl | rfl | rfl | rfl <;> rfl
+  unfold Nat.ModEq at hmod
+  exact ⟨p, hpn, hp, by omega⟩
+
+/-! ## Sieve correctness -/
+
+/-- The survival rule of the sieve on the 40%: `n` is a candidate and no prime `p` with
+    `p * p ≤ n` divides it. Crossing out the odd multiples of each prime `p` from `p * p`
+    removes exactly the candidates with such a divisor. -/
+def Survives (n : ℕ) : Prop :=
+  5 < n ∧ (n % 10 = 1 ∨ n % 10 = 3 ∨ n % 10 = 7 ∨ n % 10 = 9) ∧
+    ∀ p < n + 1, p * p ≤ n → p ∣ n → ¬ p.Prime
+
+instance (n : ℕ) : Decidable (Survives n) := by unfold Survives; infer_instance
+
+/-- A number survives the sieve on the 40% exactly when it is a prime above 5. -/
+theorem survives_iff (n : ℕ) : Survives n ↔ n.Prime ∧ 5 < n := by
+  constructor
+  · rintro ⟨h5, -, hno⟩
+    refine ⟨?_, h5⟩
+    by_contra hnp
+    have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+    have hle : n.minFac ≤ n := Nat.minFac_le (by omega)
+    exact hno n.minFac (by omega) (by nlinarith [hsq]) (Nat.minFac_dvd n)
+      (Nat.minFac_prime (by omega))
+  · rintro ⟨hp, h5⟩
+    refine ⟨h5, prime_ending n hp h5, fun q _ hqq hdvd hq => ?_⟩
+    rcases hp.eq_one_or_self_of_dvd q hdvd with h | h
+    · have := hq.one_lt
+      omega
+    · rw [h] at hqq
+      have := hp.one_lt
+      nlinarith
+
+/-- Reference sieve: the numbers up to `x` that survive, plus 2, 3 and 5. -/
+def primesSpec (x : ℕ) : List ℕ :=
+  (List.range (x + 1)).filter fun n => decide (n = 2 ∨ n = 3 ∨ n = 5 ∨ Survives n)
+
+/-- Sieve correctness: the reference sieve returns exactly the primes up to `x`. -/
+theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x := by
+  simp only [primesSpec, List.mem_filter, List.mem_range, decide_eq_true_eq, survives_iff]
+  constructor
+  · rintro ⟨hx, h | h | h | ⟨hp, -⟩⟩
+    · subst h; exact ⟨by norm_num, by omega⟩
+    · subst h; exact ⟨by norm_num, by omega⟩
+    · subst h; exact ⟨by norm_num, by omega⟩
+    · exact ⟨hp, by omega⟩
+  · rintro ⟨hp, hx⟩
+    refine ⟨by omega, ?_⟩
+    by_cases h5 : 5 < n
+    · exact Or.inr (Or.inr (Or.inr ⟨hp, h5⟩))
+    · have hn : n ≤ 5 := by omega
+      interval_cases n
+      · exact absurd hp Nat.not_prime_zero
+      · exact absurd hp Nat.not_prime_one
+      · exact Or.inl rfl
+      · exact Or.inr (Or.inl rfl)
+      · exact absurd hp (by norm_num)
+      · exact Or.inr (Or.inr (Or.inl rfl))
 
 /-- Challenge definition (Comparator Live, "There Are Infinitely Many Primes"). -/
 def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n
@@ -334,6 +404,9 @@ def mersenneReport (record : ℕ) : IO Unit := do
 def rangeStart : ℕ := 10 ^ 28
 def rangeEnd   : ℕ := 10 ^ 28 + 99999
 def blocks     : ℕ := 10
+
+-- Cross-check (computation, not proof): the fast array sieve agrees with `primesSpec`.
+#eval (primesUpTo 3000).toList == primesSpec 3000
 
 #eval report rangeStart rangeEnd blocks
 #eval mersenneReport 136279841

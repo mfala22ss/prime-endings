@@ -134,6 +134,9 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and th
 | `smallest_factor_le_sqrt` | A composite number's smallest prime factor, squared, is at most the number. This is why the sieve may stop at the square root. |
 | `candidate_prime_above` | For every n there is a prime above n ending in 1, 3, 7 or 9. So the 40% holds infinitely many primes. |
 | `InfinitudeOfPrimes` | For every n there is a prime above n (Comparator Live's built-in challenge). |
+| `infinitely_many_ending` | For **each** of 1, 3, 7 and 9, infinitely many primes end in it (from Mathlib's Dirichlet theorem). |
+| `survives_iff` | A number survives sieving the 40% (no prime p with p x p ≤ n divides it) exactly when it is a prime above 5. |
+| `mem_primesSpec` | **Sieve correctness:** the reference sieve `primesSpec x` lists exactly the primes up to x: `n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x`. |
 | `density_factor` | 1 / 0.4 = 5/2, the source of the 2.5. |
 | `prime_97`, `not_prime_91` | 97 is prime; 91 = 7 x 13 is not. |
 | `candidateCount_100`, `candidateCount_1e10` | The counting formula gives 38 kept numbers at 100 and 3,999,999,998 at 10^10. |
@@ -178,6 +181,17 @@ In Lean this is `candidate_prime_above`:
 
 The factor 10 is what ties the proof to this project. Euclid's classical version uses n! + 1. Here the prime's ending is guaranteed by `prime_ending`.
 
+### Proof 3: the sieve keeps exactly the primes
+
+`Survives n` states the sieve's rule: n is above 5, ends in 1, 3, 7 or 9, and no prime p with p x p ≤ n divides it. Crossing out the odd multiples of each prime p from p x p removes exactly the candidates that break this rule.
+
+1. **A survivor is prime.** If a survivor n were not prime, its smallest prime factor m would satisfy m x m ≤ n (`smallest_factor_le_sqrt`), and m would have crossed n out. Contradiction.
+2. **A prime above 5 survives.** It is in the 40% by `prime_ending`. Its only divisors are 1 and itself, and n x n > n, so no prime with p x p ≤ n divides it.
+
+`survives_iff` is this argument. `mem_primesSpec` adds the primes 2, 3 and 5 and concludes that `primesSpec x` is exactly the list of primes up to x.
+
+The fast array sieve used for the reports (`primesUpTo`, `primesBetween`) is a separate, faster implementation. It is compared with `primesSpec` by computation (identical up to 3,000, the `#eval` line in the file), not by proof.
+
 ---
 
 ## What "verified by Lean" means
@@ -192,11 +206,11 @@ The factor 10 is what ties the proof to this project. Euclid's classical version
 
 Two runs were made on Comparator Live:
 
-* **The built-in challenge "There Are Infinitely Many Primes"**: passed. Because the challenge is the site's own, its statement did not have to be trusted by us.
+* **The built-in challenge "There Are Infinitely Many Primes"**: passed, including with the current file (which also contains `infinitely_many_ending`, `survives_iff` and `mem_primesSpec`; a failure in any proof would have stopped the build). Because the challenge is the site's own, its statement did not have to be trusted by us.
 
   ![Comparator Live: InfinitudeOfPrimes verified](docs/img/comparator-infinitude-success.png)
 
-* **A local challenge, [`lean/Challenge.lean`](lean/Challenge.lean), with [`lean/config.json`](lean/config.json)**: passed for `prime_ending`, `removed_not_prime`, `smallest_factor_le_sqrt`, `density_factor`, `prime_97` and `not_prime_91`. `candidate_prime_above` was added to the challenge afterwards and is checked by the successful build of the whole solution, which compiles every proof in the file.
+* **A local challenge, [`lean/Challenge.lean`](lean/Challenge.lean), with [`lean/config.json`](lean/config.json)**: passed for `prime_ending`, `removed_not_prime`, `smallest_factor_le_sqrt`, `density_factor`, `prime_97` and `not_prime_91`. `candidate_prime_above`, `infinitely_many_ending`, `survives_iff` and `mem_primesSpec` were added to the challenge afterwards. They are checked by the successful build of the whole solution, which compiles every proof in the file; running the updated local challenge would add them to Comparator's certificate.
 
 **What verification does and does not give.**
 
@@ -240,7 +254,7 @@ Set `rangeStart`, `rangeEnd` and `blocks` at the bottom of the file and evaluate
 It works at any size:
 
 * **up to about 4 x 10^12**: exact, by the sieve, for ranges up to 1,000,000 numbers wide;
-* **above that**: the window is sieved by all primes up to 2,000,000 and the survivors are tested with Miller-Rabin. This is a proof of primality below 3.3 x 10^24 and gives "probable primes" above it. Ranges up to 200,000 numbers wide.
+* **above that**: the window is sieved by all primes up to 2,000,000 and the survivors are tested with Miller-Rabin. This is a proof of primality below ψ13 = 3,317,044,064,679,887,385,961,981, the smallest number that fools Miller-Rabin on the first 13 prime bases (Sorenson and Webster, *Mathematics of Computation*, 2017), and gives "probable primes" above it. Ranges up to 200,000 numbers wide.
 
 It also reports on the largest known prime, 2^136,279,841 - 1: its digit count, first and last digits, the next candidate exponents, and the Mersenne primes with exponent below 1,300 (by the Lucas-Lehmer test).
 
@@ -282,7 +296,9 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 ## Limits
 
 * Counts above 10^10 by ending were not computed: primecount counts all primes, not primes by ending, and the sieve would take about 15 hours to reach 10^13.
-* The Lean report's results above 3.3 x 10^24 are probable primes, as stated in its output.
+* The Lean report's results above 3.3 x 10^24 are probable primes, as stated in its output. The 1,554 primes found from 10^28 to 10^28 + 99,999 are therefore probable primes in Lean; sympy confirms the same list independently.
+* Sieve correctness is proved for the reference sieve `primesSpec`. The faster array sieve is checked against it by computation, not proved equal.
+* The 2.5 / (ln x - 1) share is measured and matches the prime number theorem, but it is not proved in Lean: that needs the prime number theorem itself, which this file does not formalise.
 * The Lean theorems `record_digits` and `first_exponent_100M` prove what the formula gives with a 40-digit value of log10 2; they match an independent high-precision calculation but are not a proof from first principles.
 * Density "predictions" describe how many primes there are, not which numbers are prime.
 

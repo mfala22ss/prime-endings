@@ -8,7 +8,14 @@
         "candidate_prime_above",
         "density_factor",
         "prime_97",
-        "not_prime_91"
+        "not_prime_91",
+        "infinitely_many_ending",
+        "survives_iff",
+        "mem_primesSpec"
     ],
-    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
 }

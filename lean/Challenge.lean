@@ -18,3 +18,19 @@ theorem density_factor : (1 : ℚ) / (4 / 10) = 5 / 2 := sorry
 theorem prime_97 : Nat.Prime 97 := sorry
 
 theorem not_prime_91 : ¬ Nat.Prime 91 := sorry
+
+theorem infinitely_many_ending (d : ℕ) (hd : d = 1 ∨ d = 3 ∨ d = 7 ∨ d = 9) (n : ℕ) :
+    ∃ p > n, p.Prime ∧ p % 10 = d := sorry
+
+def Survives (n : ℕ) : Prop :=
+  5 < n ∧ (n % 10 = 1 ∨ n % 10 = 3 ∨ n % 10 = 7 ∨ n % 10 = 9) ∧
+    ∀ p < n + 1, p * p ≤ n → p ∣ n → ¬ p.Prime
+
+instance (n : ℕ) : Decidable (Survives n) := by unfold Survives; infer_instance
+
+theorem survives_iff (n : ℕ) : Survives n ↔ n.Prime ∧ 5 < n := sorry
+
+def primesSpec (x : ℕ) : List ℕ :=
+  (List.range (x + 1)).filter fun n => decide (n = 2 ∨ n = 3 ∨ n = 5 ∨ Survives n)
+
+theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x := sorry
