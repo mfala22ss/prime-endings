@@ -219,6 +219,39 @@ The largest model gap in the full Python table is 1.1% (relative), inside the 2%
 
 ---
 
+## Step 10. Count, filter and find the multiples at x = 10^29
+
+**Question.** Take x = 100,000,000,000,000,000,000,000,000,000 (10^29). How many numbers are kept and removed, how many are prime, and which primes' multiples make up the rest?
+
+**Built.** [`python/steps/step10_one_hundred_octillion.py`](python/steps/step10_one_hundred_octillion.py). Counting, filtering and multiples are exact whole-number arithmetic. The prime count P(10^29) = 1,520,698,109,714,272,166,094,258,063 is quoted from published tables ([OEIS A006880](https://oeis.org/A006880); primecount records, Baugh and Walisch, 2022), because computing it here would take days.
+
+**How the multiples are counted without listing them.** A multiple of p in the 40% is p x m where m itself ends in 1, 3, 7 or 9, so their number is the count of such m up to x / p. "Caught first by p" (p is the smallest prime factor) is counted by inclusion-exclusion over the smaller primes.
+
+**Checked by.** The same formulas run at 10^6 and are compared with a real sieve: PASS.
+
+**Result.**
+
+| Step | Count | Share |
+|---|---:|---:|
+| All numbers | 100,000,000,000,000,000,000,000,000,000 | 100% |
+| Removed (60%) | 60,000,000,000,000,000,000,000,000,002 | 60% |
+| Kept (40%) | 39,999,999,999,999,999,999,999,999,998 | 40% |
+| Primes in the 40% | 1,520,698,109,714,272,166,094,258,060 | 3.80% of the 40% |
+| Non-primes in the 40% | 38,479,301,890,285,727,833,905,741,938 | 96.20% of the 40% |
+
+| Prime p | Multiples of p in the 40% | Non-primes caught first by p | Share of non-primes |
+|---|---:|---:|---:|
+| 3 | 13,333,333,333,333,333,333,333,333,333 | 13,333,333,333,333,333,333,333,333,333 | 34.65% |
+| 7 | 5,714,285,714,285,714,285,714,285,713 | 3,809,523,809,523,809,523,809,523,808 | 9.90% |
+| 11 | 3,636,363,636,363,636,363,636,363,635 | 2,077,922,077,922,077,922,077,922,077 | 5.40% |
+| 13 | 3,076,923,076,923,076,923,076,923,076 | 1,598,401,598,401,598,401,598,401,597 | 4.15% |
+| 3 to 31 together | | 24,714,784,861,101,396,232,412,567,843 | 64.23% |
+| primes above 31 | | 13,764,517,029,184,331,601,493,174,095 | 35.77% |
+
+A full sieve would need every prime up to the square root of 10^29 (316,227,766,016,837): 9,773,865,306,519 of them, leaving out 2 and 5 (counted by primecount). The estimate li(x) is off by 3 x 10^-13 %; the simple 2.5 / (ln x - 1) formula by -0.024%.
+
+---
+
 ## The Lean proofs, in the order they were built
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
