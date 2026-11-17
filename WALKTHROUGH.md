@@ -411,6 +411,24 @@ Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61
 
 **Step 5: license and citation.** Code stays MIT. The papers are CC BY 4.0, which requires credit on reuse. [`CITATION.cff`](CITATION.cff) adds GitHub's "Cite this repository" button.
 
+## Step 15. Running our method itself to 10^10
+
+**What was asked.** Was our model actually tested: the method (strip the 60%, keep 1, 3, 7, 9, cross out multiples up to √x) and its derived prediction 2.5 / (ln x − 1)?
+
+**What had been tested before.** The method was run end to end only up to 10^8 (step 6, checked number by number) and on windows. Above 10^8 the true counts came from primecount and from a standard sieve, not from our method.
+
+**What was done.** [`python/steps/step14_method_to_1e10.py`](python/steps/step14_method_to_1e10.py) runs exactly our three steps in blocks of 10^8 up to 10^10. For each prime p from 3 to 100,000 (not 5) it crosses out p × k for k ≥ p ending in 1, 3, 7 or 9, starting each block at max(p, ⌈lo / p⌉), the rule proved in Lean as `window_sieve`.
+
+**Result** ([`results/step14_method_to_1e10.txt`](results/step14_method_to_1e10.txt), 55 seconds):
+
+| x | Survivors + 2, 3, 5 | primecount | Equal | Share | Prediction | Error |
+|---|---:|---:|:---:|---:|---:|---:|
+| 10^8 | 5,761,455 | 5,761,455 | yes | 14.4036% | 14.3508% | −0.37% |
+| 10^9 | 50,847,534 | 50,847,534 | yes | 12.7119% | 12.6754% | −0.29% |
+| 10^10 | 455,052,511 | 455,052,511 | yes | 11.3763% | 11.3503% | −0.23% |
+
+Status: ESTABLISHED by this run. The method gives the exact prime count at every checkpoint, and the prediction is within 0.4%, improving with x.
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).

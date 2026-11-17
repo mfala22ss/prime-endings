@@ -174,6 +174,16 @@ All figures below are copied from [`results`](results), produced by the scripts 
 * **The fitted curve gets worse as x grows:** −0.47% at 10^4, +1.91% at 10^13. It was tuned to small numbers, so it is slightly better than our model only at 10^4, close to its training data, and drifts beyond.
 * **The two agree in shape.** Data alone led to a / (ln x − b) with a ≈ 2.57 and b ≈ 0.79, close to our model's 2.5 and 1. That is independent support for the formula; the formula itself does not depend on it.
 
+**Our method itself, run to 10^10.** The true counts above come from a standard sieve and from primecount. To test our method directly, [`python/steps/step14_method_to_1e10.py`](python/steps/step14_method_to_1e10.py) runs exactly our three steps (strip the 60%, keep endings 1, 3, 7, 9, cross out p × k for primes p up to √x and multipliers k ending in 1, 3, 7, 9) in blocks of 10^8, all the way to 10^10, in 55 seconds. Source: [`results/step14_method_to_1e10.txt`](results/step14_method_to_1e10.txt).
+
+| x | Kept after step 2 | Survivors of step 3, plus 2, 3, 5 | True prime count (primecount) | Equal? | Share | Our model's prediction | Error |
+|---|---:|---:|---:|:---:|---:|---:|---:|
+| 10^8 | 39,999,998 | 5,761,455 | 5,761,455 | yes | 14.4036% | 14.3508% | −0.37% |
+| 10^9 | 399,999,998 | 50,847,534 | 50,847,534 | yes | 12.7119% | 12.6754% | −0.29% |
+| 10^10 | 3,999,999,998 | 455,052,511 | 455,052,511 | yes | 11.3763% | 11.3503% | −0.23% |
+
+So both halves of our model are tested on the same run: the method finds exactly the right number of primes, and the derived prediction matches their share to within 0.4%.
+
 **Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against our model's local prediction 2.5 / ln x):
 
 | x | Local share near x | Our model, 2.5 / ln x | Error |
@@ -442,6 +452,7 @@ Two short papers in journal format, written for an academic reader with no names
 | `steps/step10_one_hundred_octillion.py` | Exact counts, filter and multiples at x = 10^29 | 1 s |
 | `steps/step11_three_and_seven.py` | The square-root rule worked for 3 and 7, with formulas checked for every x up to 100,000 | 1 s |
 | `steps/step12_zeta_map.py` | The 40% filter, the sieve and the endings as pieces of the zeta function | 2 s |
+| `steps/step14_method_to_1e10.py` | Runs our three-step method itself to 10^10 in blocks; compares with primecount and with our model's prediction | 1 min |
 | `steps/step13_find_zeros.py` | Zeta workings step by step; finds all 138 zeros up to height 300 and proves none were missed | 1 min |
 | `make_prime_tables.py` | Writes `data/primes_40pct_up_to_1e6.csv` and `data/breakdown_by_ending.csv` | 1 min |
 | `extras/density_models.py` | Compares fitted models with li(x), Riemann's R(x) and up to 1,000 zeta-zero waves | 6 s |
