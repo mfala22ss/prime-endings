@@ -267,6 +267,22 @@ For each prime, the first 111 multiples in rows of 10, then a 33 x 33 grid of th
 
 In every row of 10 multiples, 4 land in the 40% (p x k ends in 1, 3, 7 or 9 exactly when k does). For 7, about one third of those are also multiples of 3, so 7 is left with the other two thirds: the 1/7 x 2/3 share seen in step 10.
 
+## Interactive multiples grid
+
+**Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
+
+**What it does.**
+
+* A grid with adjustable rows (up to 60), columns (up to 40) and starting number.
+* Any set of numbers whose multiples are coloured, each with its own colour; shared multiples are striped. Presets: 3 and 7; 2, 3, 5, 7; and "Sieve primes" (every prime up to the square root of the last number).
+* Two modes: every multiple, or sieve mode, where each number is coloured only by the smallest number that crosses it out (starting at that number squared), so the uncoloured cells are the primes.
+* Play, Step, Reset and Show all, with a speed control; multiples appear one at a time. With the system's reduced-motion setting, they appear without animation.
+* Clicking a number shows its factors, whether it is in the 40%, and what caught it; double-clicking adds it as a divisor. A table counts the multiples, those in the 40%, and those caught first.
+
+**Checked by.** Headless Chrome screenshots of the default view, a sieve run, and a phone-width view; a sieve run on 1 to 100 leaves exactly the primes uncoloured and reports 91 = 7 x 13 caught first by 7; no JavaScript errors in the page console.
+
+---
+
 ## The Lean proofs, in the order they were built
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
