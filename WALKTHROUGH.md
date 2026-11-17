@@ -351,6 +351,28 @@ New primes join only at prime squares (9, 49, 121, 169, 289, 361, 529, 841, 961,
 
 ---
 
+## Step 12. Mapping the findings onto the zeta function
+
+**Built.** [`python/steps/step12_zeta_map.py`](python/steps/step12_zeta_map.py) ([output](results/step12_zeta_map.txt)).
+
+The zeta function takes a number s and returns ζ(s) = 1 + 1/2^s + 1/3^s + ... Euler showed it equals a product over all primes, ζ(s) = ∏ 1/(1 − 1/p^s). Each step of this project is one piece of that product, at a particular s.
+
+| Finding in this project | Zeta-function counterpart | s | Checked value |
+|---|---|---|---|
+| Throw away multiples of 2 and 5, keep 40% | multiply by (1 − 2^−s)(1 − 5^−s) | 1 | 1/2 x 4/5 = 0.4 |
+| The 40% as a sum | ζ₄₀(s) = Σ 1/n^s over n ending in 1, 3, 7, 9 = ζ(s)(1 − 2^−s)(1 − 5^−s) | 2 | 1.18435252813072 both ways (ζ(2) = π²/6) |
+| Sieving by each prime p removes 1/p of what is left | the Euler factor (1 − 1/p) at s = 1 | 1 | product to 9,973 = 0.0608847 vs e^−γ / ln 9,973 = 0.0609776 (Mertens) |
+| Endings 1 and 9 lag behind 3 and 7 (Chebyshev's bias) | the L-function of χ = +1 on endings 1, 9 and −1 on 3, 7 | 1 | L(1, χ) = 0.645613411446006 = (3/2) x 2 ln φ / √5 |
+| The wobble of P(x) around li(x) (steps with zeta-zero waves) | zeros ρ = 1/2 + iγ, one wave each | 1/2 + iγ | γ₁ = 14.1347251417, |ζ| below 10^−25 |
+
+**What number to enter.**
+
+* s = 1: the density of primes. ζ has a pole there (the harmonic series diverges), which is why there are infinitely many primes and why density falls like 1/ln x.
+* s = 2: the clean, convergent version. ζ(2) = π²/6, and the 40% version is π²/6 x 3/4 x 24/25.
+* s = 1/2 + iγ at the zeros (14.1347..., 21.0220..., 25.0109...): these control the error in counting primes. The Riemann hypothesis says every non-trivial zero has real part 1/2.
+
+---
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
