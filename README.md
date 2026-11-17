@@ -18,30 +18,92 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 
 ## Contents
 
-1. [The idea in one table](#the-idea-in-one-table)
-2. [How the project came about](#how-the-project-came-about)
-3. [Results](#results)
-4. [The Lean proofs](#the-lean-proofs)
-5. [What "verified by Lean" means](#what-verified-by-lean-means)
-6. [What the code can do](#what-the-code-can-do)
-7. [How to run it](#how-to-run-it)
-8. [Prior work](#prior-work)
-9. [Limits](#limits)
-10. [Papers](#papers)
-11. [License and citation](#license-and-citation)
+1. [The question in plain words](#the-question-in-plain-words)
+2. [Terms and formulas used everywhere below](#terms-and-formulas-used-everywhere-below)
+3. [The idea in one table](#the-idea-in-one-table)
+4. [How the project came about](#how-the-project-came-about)
+5. [Results](#results), each with what was measured, how, the numbers, and what they mean
+6. [The Lean proofs](#the-lean-proofs)
+7. [Papers](#papers)
+8. [What "verified by Lean" means](#what-verified-by-lean-means)
+9. [What the code can do](#what-the-code-can-do)
+10. [How to run it](#how-to-run-it)
+11. [Prior work](#prior-work)
+12. [Limits](#limits)
+13. [License and citation](#license-and-citation)
+14. [Glossary](#glossary)
+
+---
+
+## The question in plain words
+
+A prime is a whole number above 1 whose only divisors are 1 and itself: 2, 3, 5, 7, 11, 13, ... Apart from 2 and 5, every prime ends in 1, 3, 7 or 9, because a number ending in an even digit is divisible by 2 and a number ending in 5 is divisible by 5.
+
+So if you want to find primes, you can throw away 60% of all numbers at once and lose nothing except 2 and 5, which you keep by hand (3 is kept by hand too, for a reason explained in the next section). This project asks what happens next:
+
+* How many of the remaining 40% are prime, and how does that share change as numbers get bigger?
+* Can the share be predicted, by a formula from theory and by a model trained on data, and which predicts better?
+* Do the four endings 1, 3, 7, 9 get equal shares of the primes?
+* How do you get from the 40% down to exactly the primes (the sieve), and can that be proved correct by a computer?
+
+---
+
+## Terms and formulas used everywhere below
+
+Most of the confusion in earlier versions came from two different "densities" and three different formulas being shown side by side without saying which was which. This section fixes the vocabulary; every table below uses it.
+
+### The counts
+
+| Symbol | Meaning | Example at x = 100 |
+|---|---|---|
+| x | The upper limit: we look at the numbers 1, 2, ..., x | 100 |
+| π(x) | The number of primes up to x (said "pi of x"; nothing to do with 3.14) | 25 |
+| kept numbers, C(x) | The numbers above 5 and up to x that end in 1, 3, 7 or 9. Formula: 4 × ⌊x / 10⌋ + (how many of 1, 3, 7, 9 are ≤ the last digit of x) − 2. The "− 2" removes 1 and 3, which end in 1 and 3 but are not above 5 | 38 |
+| kept primes | Primes inside the kept numbers: every prime except 2, 3 and 5, so π(x) − 3 | 22 |
+
+The prime 3 ends in 3 but is not "above 5", so it is counted with 2 and 5 as one of the three primes handled separately. That is why the kept primes are π(x) − 3, not π(x) − 2.
+
+### Two kinds of density
+
+* **Average share up to x**: (kept primes) ÷ (kept numbers). Out of all the kept numbers from 6 to x, what fraction is prime? At x = 100 it is 22 / 38 = 57.9%. This is what the main tables report.
+* **Local share near x**: the same fraction, but counted only in a narrow window just below x (for example the last million numbers). It answers "if I pick a kept number of about this size, how likely is it to be prime?" It is always a little lower than the average share, because the average includes the smaller numbers, where primes are more common.
+
+### Three formulas, and how they differ
+
+**1. Theory, average share: 2.5 / (ln x − 1)**
+* Predicts the average share up to x.
+* Derived, nothing fitted. The prime number theorem gives π(x) ≈ x / (ln x − 1), and there are about 0.4 x kept numbers, so the share is [x / (ln x − 1)] ÷ 0.4 x = 2.5 / (ln x − 1).
+* The 2.5 is 1 ÷ 0.4: the same primes packed into 40% of the numbers.
+
+**2. Theory, local share: 2.5 / ln x**
+* Predicts the local share near x.
+* Derived, nothing fitted. Near x, a random whole number is prime with probability about 1 / ln x; inside the 40% that becomes 2.5 / ln x.
+
+**3. Our model: 2.5694 / (ln x − 0.7918)**
+* Predicts the average share up to x, like formula 1.
+* **Fitted to data.** We assumed the shape a / (ln x − b) and let the computer choose a and b to match the measured average share at 200 values of x between 1,000 and 400,000, and nothing larger.
+
+ln x is the natural logarithm of x (ln 10 ≈ 2.3026, ln 10^8 ≈ 18.42). It grows very slowly, which is why the share falls slowly.
+
+**The model and the theory have the same shape.** Our model "rediscovered" the form a / (ln x − b). The difference is in the two numbers:
+
+* The theory's 2.5 and 1 come from mathematics and are correct for all large x.
+* The model's 2.5694 and 0.7918 were tuned to small numbers (up to 400,000), where the true share behaves slightly differently. So the model is very accurate near its training range and drifts slowly away from the truth beyond it, while the theory gets more accurate the larger x is. The results table shows exactly that.
+
+**How the model was fitted.** If share = a / (ln x − b), then 1 / share = (1/a) ln x − b/a, which is a straight line in ln x. An ordinary straight-line fit (least squares) of 1 / share against ln x gives the slope and intercept, and from them a and b. Script: [`python/steps/step1_density.py`](python/steps/step1_density.py).
+
+**"Error" in every table means relative error:** (prediction − true value) ÷ true value. +1.19% means the prediction is 1.19% too high.
 
 ---
 
 ## The idea in one table
 
-Take every number from 1 to x. Numbers ending in 0, 2, 4, 6 or 8 are even, so they are divisible by 2. Numbers ending in 5 are divisible by 5. So apart from 2 and 5 themselves, no prime can end in those digits. Remove them and 40% of the numbers remain. All primes above 5 are in that 40%.
-
-Up to **x = 10,000,000,000**, as shares of all numbers (counted exactly; [`data/breakdown_by_ending.csv`](data/breakdown_by_ending.csv)):
+Every number from 1 to **x = 10,000,000,000** (ten billion), sorted by last digit and counted exactly ([`data/breakdown_by_ending.csv`](data/breakdown_by_ending.csv)). The "Prime" and "Not prime" columns are percentages of **all ten billion numbers**, not of the row.
 
 | Group | Count | Prime | Not prime | Total |
 |--------------------------|----------------:|------------------:|----------------:|--------:|
-| Ends in 1 | 999,999,999 | 1.1376% | 8.8624% | 10% |
-| Ends in 3 | 999,999,999 | 1.1377% | 8.8623% | 10% |
+| Ends in 1 (above 5) | 999,999,999 | 1.1376% | 8.8624% | 10% |
+| Ends in 3 (above 5) | 999,999,999 | 1.1377% | 8.8623% | 10% |
 | Ends in 7 | 1,000,000,000 | 1.1376% | 8.8624% | 10% |
 | Ends in 9 | 1,000,000,000 | 1.1376% | 8.8624% | 10% |
 | **Kept (40%)** | **3,999,999,998** | **4.5505%** | **35.4495%** | **40%** |
@@ -51,26 +113,31 @@ Up to **x = 10,000,000,000**, as shares of all numbers (counted exactly; [`data/
 | **Removed (60%)** | **6,000,000,002** | **3 primes, kept separately** | **5,999,999,999** | **60%** |
 | **All numbers** | **10,000,000,000** | **4.5505%** | **95.4495%** | **100%** |
 
-So the filter keeps 40% of the numbers plus the primes 2, 3 and 5, and loses no prime: the prime count is always 3 + the primes in the 40%. Within the kept 40%, **11.38%** are prime at this size (4.5505 / 40), and that share keeps falling as x grows.
+How to read it:
+
+* "Ends in 1" has 999,999,999 numbers, not a billion, because 1 itself is not above 5 and is listed with 3 in its own row.
+* 4.5505% of all numbers up to ten billion are prime: 455,052,508 kept primes plus 2, 3 and 5.
+* Inside the kept 40%, the average share is 4.5505 ÷ 40 = **11.38%**. The filter has raised the chance that a number is prime by the factor 2.5, from 4.55% to 11.38%, without losing a single prime.
 
 ---
 
 ## How the project came about
 
-The project grew one question at a time. Each step has its own script in [`python/steps`](python/steps) and its saved output in [`results`](results).
+The project grew one question at a time. Each step has a script in [`python/steps`](python/steps) and its saved output in [`results`](results). The full story, with every intermediate result, is in [WALKTHROUGH.md](WALKTHROUGH.md).
 
-| Step | Question | Answer |
-|-------|----------------------------|--------------------------------------------------|
-| 1 | Can a model predict how prime density falls on the kept 40%? | Yes. A model trained only on x up to 400,000 stays within 2% out to 10^13. The theory formula 2.5 / (ln x - 1) is within 0.13% there. |
-| 2 | How does the density change each time x grows ten-fold? | The drop shrinks every time, following about 2.3 / ln x. The number of new primes grows by a factor that rises towards 10 but never reaches it. |
-| 3 | Does this hold up to 10 trillion, with every count computed locally? | Yes, using primecount. 346,065,536,836 of the 3,999,999,999,998 kept numbers up to 10^13 are prime (8.65%). |
-| 4 | Do the four endings behave the same? | Almost exactly. At 10^10 each is 11.376% prime. Endings 1 and 9 sit very slightly lower (Chebyshev's bias). |
-| 5 | How are primes ending in 1 spaced? | Average spacing is exactly 4 ln x (82.69 near 10^9). Spacings divisible by 30 are strongly favoured (44.5% of gaps against 29% under a no-pattern model), as Hardy and Littlewood predicted. |
-| 6 | Sieving the 40% by 3, 7, 11, ... up to the square root of x: what is left? | Exactly the primes, verified number by number. Each small prime p removes 1/p of what is left. |
-| 7 | Is all of the above code actually correct? | An audit with 13 checks against independent ground truth. 13 of 13 pass. |
-| 8 | Precision, recall, and bigger wheels (mod 30, 210, 2310)? | Recall is 100% for every wheel. Precision at 10^8 rises from 14.4% (mod 10) to 21.6% (mod 30) and 27.7% (mod 2310), matching boost / (ln x - 1). Testing only candidates near 10^12 is just 1.1 to 1.2 times faster, because a primality test already discards multiples of 2, 3, 5 almost instantly. |
+| Step | Question | Method | Answer |
+|-------|----------------------------|-----------------------|--------------------------------------------------|
+| 1 | Can the share of primes in the 40% be predicted? | Fit our model on x ≤ 400,000; compare it and the theory with true counts | Yes. The model stays within 2% out to 10^13; the theory is within 0.13% there |
+| 2 | How does the share change each time x grows ten-fold? | Measure the drop per power of ten; compare with the theory | The drop shrinks every time, by about ln 10 / ln x |
+| 3 | Does it hold up to 10 trillion? | Exact prime counts from primecount | Yes. 346,065,536,836 of the 3,999,999,999,998 kept numbers up to 10^13 are prime (8.65%) |
+| 4 | Do the four endings behave the same? | Count primes by ending up to 10^10 with a segmented sieve | Almost exactly: 11.376% each. Endings 1 and 9 sit very slightly lower (Chebyshev's bias) |
+| 5 | How are primes ending in 1 spaced? | Every gap between consecutive primes ending in 1 near 10^9; two models compared | Average gap 4 ln x; gaps divisible by 30 strongly favoured, as Hardy and Littlewood predicted |
+| 6 | Sieving the 40% by 3, 7, 11, ... up to √x: what is left? | Cross out multiples up to 10^8; check every survivor | Exactly the primes |
+| 7 | Is all of the above code correct? | 13 checks against independent software | 13 of 13 pass |
+| 8 | Do bigger filters (mod 30, 210, 2310) help? | Precision, recall and timing | They raise precision, lose no prime, but save little time |
+| 9 to 13 | Multiples, the square-root rule, the zeta function | See WALKTHROUGH steps 9 to 13 | See [WALKTHROUGH.md](WALKTHROUGH.md) |
 
-A Lean 4 file then proves the central facts formally (status: ESTABLISHED, kernel-checked on Comparator Live with Lean v4.36; see [The Lean proofs](#the-lean-proofs)).
+A Lean 4 file then proves the central facts formally; see [The Lean proofs](#the-lean-proofs).
 
 ---
 
@@ -78,35 +145,71 @@ A Lean 4 file then proves the central facts formally (status: ESTABLISHED, kerne
 
 All figures below are copied from [`results`](results), produced by the scripts in this repository.
 
-### The prime share of the kept 40% falls predictably
+### 1. The share of primes in the 40% falls, and can be predicted
 
-From [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt). The model was trained only on x up to 400,000.
+**What was measured.** The average share up to x (kept primes ÷ kept numbers) for x = 10^4 to 10^13.
 
-| x | True share | Model, 2.5694 / (ln x - 0.7918) | Error | Theory, 2.5 / (ln x - 1) | Error |
-|--------|-------------:|----------------------:|----------:|---------------------:|----------:|
-| 10^4 | 30.6653% | 30.5207% | -0.47% | 30.4494% | -0.70% |
-| 10^6 | 19.6238% | 19.7286% | +0.53% | 19.5076% | -0.59% |
-| 10^8 | 14.4036% | 14.5749% | +1.19% | 14.3508% | -0.37% |
-| 10^10 | 11.3763% | 11.5562% | +1.58% | 11.3503% | -0.23% |
-| 10^13 | 8.6516% | 8.8169% | +1.91% | 8.6405% | **-0.13%** |
+**How.** Exact prime counts: a sieve up to 10^8, the program primecount above that. Both are cross-checked where they overlap. Our model was fitted on x from 1,000 to 400,000 only, so every row from 10^6 on is a genuine test on numbers it never saw. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
 
-The fitted model is better near its training range. The theory, which uses no data at all, is better far beyond it. The 2.5 is simply 1 / 0.4: the same primes in 40% of the numbers.
+| x | Kept numbers | Kept primes | True average share | Our model | Model error | Theory, 2.5 / (ln x − 1) | Theory error |
+|--------|-----------------:|-----------------:|-------------:|----------:|----------:|---------:|----------:|
+| 10^4 | 3,998 | 1,226 | 30.6653% | 30.5207% | −0.47% | 30.4494% | −0.70% |
+| 10^6 | 399,998 | 78,495 | 19.6238% | 19.7286% | +0.53% | 19.5076% | −0.59% |
+| 10^8 | 39,999,998 | 5,761,452 | 14.4036% | 14.5749% | +1.19% | 14.3508% | −0.37% |
+| 10^10 | 3,999,999,998 | 455,052,508 | 11.3763% | 11.5562% | +1.58% | 11.3503% | −0.23% |
+| 10^13 | 3,999,999,999,998 | 346,065,536,836 | 8.6516% | 8.8169% | +1.91% | 8.6405% | **−0.13%** |
 
-### The density drops by a shrinking amount each power of ten
+**What it means.**
+* Both formulas track the truth closely over nine powers of ten.
+* Our model's error grows steadily (+0.5% to +1.9%) because its constants were tuned to small x.
+* The theory's error shrinks steadily (−0.7% to −0.13%) because its constants are exact in the limit. The theory, which used no data at all, wins far from the training range.
 
-From [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt):
+**Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against the local formula 2.5 / ln x):
 
-| Step | Drop | Theory drop | Growth of prime count | Measured / theory |
+| x | Local share near x | Theory, 2.5 / ln x | Error |
+|---|---:|---:|---:|
+| 10^8 | 13.5830% | 13.5717% | −0.08% |
+| 10^10 | 10.8633% | 10.8574% | −0.05% |
+| 10^13 | 8.3065% | 8.3518% | +0.55% |
+
+The local share near 10^8 (13.58%) is lower than the average share up to 10^8 (14.40%), as expected: the average includes all the smaller numbers. Do not compare a local value with the average formula or the reverse; each formula belongs to one kind of share.
+
+### 2. How much the share drops each time x grows ten-fold
+
+**What was measured.** For each step from x to 10x, the **drop**: how much the average share falls, as a percentage of its old value. Also the **growth**: how many times more kept primes there are at 10x than at x.
+
+**How.** From the counts above. The **theory drop** uses the average formula at both ends: 1 − (ln x − 1) / (ln 10x − 1). Simplified, this is about ln 10 / ln x ≈ 2.3 / ln x, which is why the drop keeps shrinking. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
+
+| Step | Measured drop | Theory drop | Growth of kept primes | Measured drop ÷ theory drop |
 |--------------------|---------:|-------------:|----------------------:|------------------:|
-| 10^4 to 10^5 | 21.82% | 21.90% | x 7.82 | 0.996 |
-| 10^8 to 10^9 | 11.75% | 11.67% | x 8.83 | 1.006 |
-| 10^12 to 10^13 | 7.98% | 7.96% | x 9.20 | 1.003 |
+| 10^4 to 10^5 | 21.82% | 21.90% | × 7.82 | 0.996 |
+| 10^8 to 10^9 | 11.75% | 11.67% | × 8.83 | 1.006 |
+| 10^12 to 10^13 | 7.98% | 7.96% | × 9.20 | 1.003 |
 
-### Sieving the 40% leaves exactly the primes
+**What it means.** Every ten-fold step multiplies the number of primes by a factor that rises towards 10 but never reaches it, so the share keeps falling, but more and more slowly. The measured drop agrees with the theory to within 1% at every step.
 
-From [`results/step7_audit.txt`](results/step7_audit.txt), up to 10^8:
+### 3. The four endings get almost exactly equal shares
 
-| After removing multiples of | Numbers left | Predicted by the product rule | Prime share of what is left |
+**What was measured.** Primes up to 10^10, split by last digit. Source: [`results/step4_endings.txt`](results/step4_endings.txt) (segmented sieve, totals checked against primecount).
+
+| Ending | Kept numbers | Primes | Share prime |
+|---|---:|---:|---:|
+| 1 | 999,999,999 | 113,761,519 | 11.3762% |
+| 3 | 999,999,999 | 113,765,624 | 11.3766% |
+| 7 | 1,000,000,000 | 113,764,039 | 11.3764% |
+| 9 | 1,000,000,000 | 113,761,326 | 11.3761% |
+
+**What it means.** Each ending holds almost exactly a quarter of the primes. The tiny pattern is that endings 3 and 7 together are ahead of 1 and 9 by 6,818 primes out of 455 million (0.0015%). This is **Chebyshev's bias** (Rubinstein and Sarnak, 1994). The usual explanation: if you count primes *and* squares of primes together, the four endings come out level to first order; but every prime squared (above 5) ends in 1 or 9, so those squares take up part of the 1-and-9 share, leaving slightly fewer actual primes there. The lead is real but vanishingly small as a fraction, and in the long run each ending gets exactly one quarter (the prime number theorem for arithmetic progressions).
+
+### 4. Sieving the 40% leaves exactly the primes
+
+**What was measured.** Start from the 39,999,998 kept numbers up to 10^8. Cross out the multiples of 3, then 7, 11, 13, ..., up to 9,973, the largest prime below √10^8 = 10,000. After each prime, count what is left.
+
+**The product rule (a prediction to compare with).** Crossing out the multiples of p removes about 1 in p of what is left, so it keeps a fraction (1 − 1/p). The product rule multiplies these fractions: after 3 it predicts 39,999,998 × 2/3; after 3 and 7, × 2/3 × 6/7, and so on. It assumes the primes act independently, which is only approximately true.
+
+Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [`results/step7_audit.txt`](results/step7_audit.txt).
+
+| After removing multiples of | Numbers left | Product rule predicts | Prime share of what is left |
 |----------------------------|---------------:|-----------------------:|--------------------:|
 | (start: the 40%) | 39,999,998 | | 14.40% |
 | 3 | 26,666,665 | 26,666,665 | 21.6% |
@@ -115,28 +218,53 @@ From [`results/step7_audit.txt`](results/step7_audit.txt), up to 10^8:
 | 997 | 8,087,521 | 8,096,526 | 71.2% |
 | every prime up to 9,973 | **5,761,452** | 6,088,469 | **100%** |
 
-The survivors equal the 5,761,452 primes above 5, checked number by number across all 100 million numbers. The product rule overshoots at the end by 5.7%; that is Mertens' theorem, not an error in the sieve.
+**What it means.**
+* The last row is the main result: what survives is exactly the 5,761,452 primes above 5 up to 10^8, checked number by number. No prime was lost and no composite survived. This is the sieve the Lean file later proves correct for every x.
+* The product rule is excellent at first and overshoots by **5.68%** at the end (6,088,469 ÷ 5,761,452 = 1.0568). That is not a bug. Mertens' theorem shows that this product, taken up to √x, always ends up about 1.12 times too large as x grows (the limit is 2e^−γ = 1.1229). The independence assumption breaks down when very many primes are used.
+* The paper in [`papers/zeta-map`](papers/zeta-map/zeta-map.pdf) quotes 5.6% for the same effect. It measures the overshoot at a different x (x = 9,973² instead of 10^8) and over all numbers instead of the 40%, so the two figures differ slightly; both are correct for their own x.
 
-### Spacing between primes ending in 1
+### 5. Spacing between primes ending in 1
 
-From [`results/step5_ending1_spacing.txt`](results/step5_ending1_spacing.txt), for the 1,209,307 primes ending in 1 between 900 million and 1 billion:
+**What was measured.** All 1,209,307 primes ending in 1 between 900 million and 1 billion, and the 1,209,306 gaps between consecutive ones. Every gap is a multiple of 10, since both ends finish in 1. Source: [`results/step5_ending1_spacing.txt`](results/step5_ending1_spacing.txt).
 
-* mean gap **82.69**, against the prediction 4 ln x = **82.69**;
-* the most common gap is **30** (14.37% of gaps);
-* gaps divisible by 30 make up **44.53%** of all gaps, against 29.02% under a pattern-free decay model;
-* pairs (p, p + 10) with both prime: 103,368 counted, 102,995 predicted by the Hardy-Littlewood pair formula (0.4% off).
+**Two models for how often each gap occurs**, both fitted to the same counts for gaps 10 to 300:
+* **Random model:** gap counts fall off smoothly (each step of 10 multiplies the count by a fixed ratio, fitted as 0.876). It treats primes as random, with no arithmetic pattern.
+* **Hardy-Littlewood model:** the same smooth fall, multiplied by a correction factor for each gap. If an odd prime q (other than 5) divides the gap, the gap is favoured by (q − 1) / (q − 2): × 2 for multiples of 3, × 1.2 for multiples of 7, × 2.4 for multiples of 21. The reason: if the gap is a multiple of 3, then p and p + gap have the same remainder mod 3, so whenever p is not a multiple of 3, neither is p + gap. Such gaps clear the "divisible by 3" test twice as often.
 
-The reason for 30: if a gap is divisible by 3, the next number can never be a multiple of 3, so it survives the "divisible by 3" test twice as often.
+| Result | Measured | Prediction |
+|---|---:|---:|
+| Average gap | 82.69 | 4 ln x = 82.69 (primes have average spacing ln x, and a quarter of them end in 1) |
+| Most common gap | 30 (14.37% of gaps) | Hardy-Littlewood favours 30 by × 2 |
+| Share of gaps that are multiples of 30 | **44.53%** | Random model: 29.02% |
+| Typical error over gaps 10 to 300 (root mean square) | | Random model 19,430; Hardy-Littlewood model **3,905** |
+| Pairs (p, p + 10), both prime and ending in 1 | 103,368 | Hardy-Littlewood pair formula: 102,995 (0.4% off) |
 
-### Very large numbers
+**What it means.** Primes are not spaced at random. The Hardy-Littlewood correction, which uses only divisibility by small primes, cuts the model error by a factor of five.
 
-The Lean report lists primes in windows at any size. In the 100,000 numbers from 10^28 to 10^28 + 99,999 it finds 1,554 primes (1.554%, against 1.551% predicted), with a mean gap of 64.17 (predicted 64.47). Python's sympy confirms the same 1,554 primes independently.
+### 6. Bigger filters: precision and recall
+
+**What was measured.** The 40% filter is "keep numbers coprime to 10". Larger filters keep numbers coprime to 30, 210 or 2310 (removing multiples of 3, of 3 and 7, and so on). For each: **recall**, the share of primes (above the filter's own primes) that the filter keeps; and **precision**, the share of kept numbers that are prime. Source: [`results/step8_precision_recall_wheels.txt`](results/step8_precision_recall_wheels.txt).
+
+| Filter | Keeps | Precision at 10^8 | Theory | Recall |
+|---|---:|---:|---:|---:|
+| mod 10 | 40.0% | 14.40% | 14.35% | 100% |
+| mod 30 | 26.7% | 21.61% | 21.53% | 100% |
+| mod 210 | 22.9% | 25.21% | 25.11% | 100% |
+| mod 2310 | 20.8% | 27.73% | 27.63% | 100% |
+
+The theory column is boost / (ln x − 1), where the boost is how much the filter concentrates primes: 2.5 for mod 10, 3.75 for mod 30, 4.375 for mod 210, 4.8125 for mod 2310 (each is the modulus divided by how many remainders it keeps).
+
+**What it means.** Every filter keeps all primes. Bigger filters raise precision, but with diminishing returns. In practice they save little time: finding all primes in a million numbers above 10^12 by testing only the kept candidates was only 1.11 (mod 10) to 1.19 (mod 2310) times faster than testing every number, because a primality test rejects multiples of 2, 3 and 5 almost instantly anyway.
+
+### 7. Very large numbers
+
+The Lean report can list primes in a window at any size. In the 100,000 numbers from 10^28 to 10^28 + 99,999 it finds 1,554 primes. That is 1.554%, against 1 / ln(10^28) = 1.551% predicted by the local density of all numbers (no filter here, so no factor 2.5). The mean gap is 64.17 against ln(10^28) = 64.47. Python's sympy finds the same 1,554 primes independently. Above 3.3 × 10^24 these are probable primes; see [Limits](#limits).
 
 ---
 
 ## The Lean proofs
 
-File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and the latest Mathlib on [Comparator Live](https://comparator.live.lean-lang.org).
+File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and, for the earlier versions, on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
 
 **What the proofs establish** (all 27 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
 
@@ -243,13 +371,13 @@ Two short papers in journal format, written for an academic reader with no names
 2. it uses no axioms beyond the standard three of Lean's logic (`propext`, `Quot.sound`, `Classical.choice`);
 3. the Lean kernel accepts it.
 
-Two runs were made on Comparator Live:
+**What has been checked so far.** Every Comparator run is listed, with its outcome, in the [run log](WALKTHROUGH.md#run-log). In short:
 
-* **The built-in challenge "There Are Infinitely Many Primes"**: passed, including with the current file (which also contains `infinitely_many_ending`, `survives_iff` and `mem_primesSpec`; a failure in any proof would have stopped the build). Because the challenge is the site's own, its statement did not have to be trusted by us.
+* **The built-in challenge "There Are Infinitely Many Primes"** has passed with this file. The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
 
   ![Comparator Live: InfinitudeOfPrimes verified](docs/img/comparator-infinitude-success.png)
 
-* **A local challenge, [`lean/Challenge.lean`](lean/Challenge.lean), with [`lean/config.json`](lean/config.json)**: passed for `prime_ending`, `removed_not_prime`, `smallest_factor_le_sqrt`, `density_factor`, `prime_97` and `not_prime_91`. `candidate_prime_above`, `infinitely_many_ending`, `survives_iff` and `mem_primesSpec` were added to the challenge afterwards. They are checked by the successful build of the whole solution, which compiles every proof in the file; running the updated local challenge would add them to Comparator's certificate.
+* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 19 theorems. It passed on Comparator for the first 6. The rest, including the window theorems added on 17 November 2026, compile with no errors against Mathlib on our machine and use only Lean's three standard axioms; their Comparator run is still to be done.
 
 **What verification does and does not give.**
 
@@ -342,7 +470,8 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 * Counts above 10^10 by ending were not computed: primecount counts all primes, not primes by ending, and the sieve would take about 15 hours to reach 10^13.
 * The Lean report's results above 3.3 x 10^24 are probable primes, as stated in its output. The 1,554 primes found from 10^28 to 10^28 + 99,999 are therefore probable primes in Lean; sympy confirms the same list independently.
 * Sieve correctness is proved for the reference sieve `primesSpec` and for any window (`window_sieve`). The faster array sieve is checked against them by computation, not proved equal.
-* The 2.5 / (ln x - 1) share is measured and matches the prime number theorem, but it is not proved in Lean: that needs the prime number theorem itself, which this file does not formalise.
+* The 2.5 / (ln x − 1) and 2.5 / ln x formulas are measured and match the prime number theorem, but they are not proved in Lean: that needs the prime number theorem itself, which Mathlib does not yet contain.
+* Our fitted model 2.5694 / (ln x − 0.7918) is a description of the data, not a law: its error grows slowly with x (+1.9% at 10^13), and it should not be used far beyond the range it was tested on.
 * The Lean theorems `record_digits` and `first_exponent_100M` prove what the formula gives with a 40-digit value of log10 2; they match an independent high-precision calculation but are not a proof from first principles.
 * Density "predictions" describe how many primes there are, not which numbers are prime.
 
@@ -351,3 +480,30 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 * **Code** (Python, Lean, tools): MIT. See [LICENSE](LICENSE). Anyone may reuse it if they keep the copyright notice.
 * **Papers and written documentation** ([`papers/`](papers), [WALKTHROUGH.md](WALKTHROUGH.md), [`docs/`](docs)): Creative Commons Attribution 4.0 ([CC BY 4.0](papers/LICENSE-CC-BY-4.0.txt)). Anyone may reuse them if they give credit.
 * **Citing:** [`CITATION.cff`](CITATION.cff) gives the citation; GitHub shows it as "Cite this repository". No license can require a citation for using an idea or a mathematical result; citing those is an academic norm, which this file makes easy to follow.
+
+---
+
+## Glossary
+
+| Term | Meaning |
+|---|---|
+| Prime | A whole number above 1 divisible only by 1 and itself |
+| π(x) | The number of primes up to x |
+| ln x | Natural logarithm of x; ln 10 ≈ 2.3026 |
+| Kept numbers, the 40% | Numbers above 5 ending in 1, 3, 7 or 9 |
+| Average share | Kept primes ÷ kept numbers, over everything from 6 to x |
+| Local share | The same fraction in a narrow window just below x |
+| Theory formula | A prediction derived from the prime number theorem, with no fitted constants |
+| Our model | 2.5694 / (ln x − 0.7918): the same shape as the theory, with constants fitted to x ≤ 400,000 |
+| Relative error | (prediction − true) ÷ true |
+| Sieve | Crossing out the multiples of small primes so that only primes remain |
+| √x rule | To sieve up to x, crossing out the multiples of the primes up to √x is enough |
+| Product rule | The prediction that crossing out p keeps a fraction (1 − 1/p) of what is left |
+| Mertens' theorem | Says the product rule, taken up to √x, overshoots by a factor tending to 2e^−γ ≈ 1.1229 |
+| Chebyshev's bias | Endings 3 and 7 hold very slightly more primes than 1 and 9 at every height tested |
+| Hardy-Littlewood | The prediction that gaps divisible by small primes are favoured by a known factor |
+| Precision, recall | Share of kept numbers that are prime; share of primes that are kept |
+| Lean, Mathlib | A proof checker, and its library of checked mathematics |
+| Comparator | A tool that checks a Lean proof against a stated challenge |
+| primecount | A program that counts primes up to x exactly without listing them |
+
