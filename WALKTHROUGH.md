@@ -277,6 +277,7 @@ In every row of 10 multiples, 4 land in the 40% (p x k ends in 1, 3, 7 or 9 exac
 * Any set of numbers whose multiples are coloured, each with its own colour; shared multiples are striped. Presets: 3 and 7; 2, 3, 5, 7; and "Sieve primes" (every prime up to the square root of the last number).
 * Two modes: every multiple, or sieve mode, where each number is coloured only by the smallest number that crosses it out (starting at that number squared), so the uncoloured cells are the primes.
 * Play, Step, Reset and Show all, with a speed control; multiples appear one at a time. With the system's reduced-motion setting, they appear without animation.
+* A switch, "Colour only multiples inside the 40%", limits the colouring, the play sequence and the "caught first" counts to multiples ending in 1, 3, 7 or 9.
 * Clicking a number shows its factors, whether it is in the 40%, and what caught it; double-clicking adds it as a divisor. A table counts the multiples, those in the 40%, and those caught first.
 
 **Checked by.** Headless Chrome screenshots of the default view, a sieve run, and a phone-width view; a sieve run on 1 to 100 leaves exactly the primes uncoloured and reports 91 = 7 x 13 caught first by 7; no JavaScript errors in the page console.
