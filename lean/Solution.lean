@@ -12,6 +12,10 @@ Main results:
 * `survives_iff`, `mem_primesSpec`: the sieve rule on the 40% keeps exactly the primes above 5,
   and the reference sieve `primesSpec x` lists exactly the primes up to `x`.
 * `infinitely_many_ending`: infinitely many primes end in each of 1, 3, 7 and 9 (Dirichlet).
+* `sqrt_rule`, `square_not_prime`, `square_needs_p`: sieving by the primes up to `√x` is enough,
+  and each prime is needed from its square on.
+* `three_seven_enough`, `three_seven_fails_at_121`: on the 40%, 3 and 7 alone leave exactly the
+  primes up to 120, and first fail at 121 = 11 × 11.
 
 Computation: `report a b g` lists the primes in `[a, b]` together with summary statistics.
 Windows with `√b ≤ 2·10⁶` are sieved exactly. Larger windows are pre-sieved by all primes up to
@@ -151,6 +155,66 @@ theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x 
       · exact Or.inr (Or.inl rfl)
       · exact absurd hp (by norm_num)
       · exact Or.inr (Or.inr (Or.inl rfl))
+
+/-! ## Step 11: the square-root rule, and the sieve with 3 and 7 -/
+
+/-- **The square-root rule, part 1 (enough).** If `1 < n ≤ x` and no prime `p` with `p * p ≤ x`
+    divides `n`, then `n` is prime. So crossing out the multiples of the primes up to `√x`
+    leaves only primes. -/
+theorem sqrt_rule (x n : ℕ) (hn : 1 < n) (hx : n ≤ x)
+    (h : ∀ p, p.Prime → p * p ≤ x → ¬ p ∣ n) : n.Prime := by
+  by_contra hnp
+  have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+  exact h n.minFac (Nat.minFac_prime (by omega)) (by nlinarith [hsq]) (Nat.minFac_dvd n)
+
+/-- **The square-root rule, part 2 (nothing less works).** `p * p` is never prime ... -/
+theorem square_not_prime (p : ℕ) (hp : p.Prime) : ¬ (p * p).Prime := by
+  intro h
+  rcases h.eq_one_or_self_of_dvd p (Dvd.intro p rfl) with h1 | h1
+  · exact hp.one_lt.ne' h1
+  · have := hp.one_lt
+    nlinarith
+
+/-- ... and the only prime dividing `p * p` is `p`. So if `p` is left out of the sieve,
+    `p * p` survives: every prime is needed from its square on. -/
+theorem square_needs_p (p q : ℕ) (hp : p.Prime) (hq : q.Prime) (h : q ∣ p * p) : q = p := by
+  have h1 : q ∣ p := by
+    rcases (Nat.Prime.dvd_mul hq).mp h with h1 | h1 <;> exact h1
+  rcases hp.eq_one_or_self_of_dvd q h1 with h2 | h2
+  · exact absurd h2 hq.one_lt.ne'
+  · exact h2
+
+/-- **3 and 7 are enough up to 120.** A number `5 < n ≤ 120` that ends in 1, 3, 7 or 9, is not a
+    multiple of 3, and is not a multiple of 7 (other than 7 itself) is prime. -/
+theorem three_seven_enough (n : ℕ) (h5 : 5 < n) (hn : n ≤ 120)
+    (hend : n % 10 = 1 ∨ n % 10 = 3 ∨ n % 10 = 7 ∨ n % 10 = 9)
+    (h3 : ¬ 3 ∣ n) (h7 : ¬ 7 ∣ n ∨ n = 7) : n.Prime := by
+  by_contra hnp
+  have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+  have hp : n.minFac.Prime := Nat.minFac_prime (by omega)
+  have hdvd : n.minFac ∣ n := Nat.minFac_dvd n
+  obtain ⟨m, hm⟩ : ∃ m, m = n.minFac := ⟨_, rfl⟩
+  rw [← hm] at hsq hp hdvd
+  have hm2 : 2 ≤ m := hp.two_le
+  have hle : m ≤ 10 := by nlinarith
+  interval_cases m
+  all_goals omega
+
+/-- **And 120 is the limit.** 121 = 11 × 11 ends in 1, is not a multiple of 3 or 7, and is not
+    prime: 3 and 7 alone first fail at 121. -/
+theorem three_seven_fails_at_121 :
+    121 % 10 = 1 ∧ ¬ 3 ∣ 121 ∧ ¬ 7 ∣ 121 ∧ ¬ Nat.Prime 121 := by
+  refine ⟨by norm_num, by norm_num, by norm_num, by norm_num⟩
+
+/-- The counting formulas of step 11: `N y` numbers in `1..y` ending in 1, 3, 7, 9; `left37 x`
+    numbers of the 40% up to `x` left after crossing out the multiples of 3 and 7. -/
+def N (y : ℕ) : ℕ := y - y / 2 - y / 5 + y / 10
+
+def left37 (x : ℕ) : ℕ := (N x - 2) - (N (x / 3) + N (x / 7) - N (x / 21) - 2)
+
+theorem left37_100 : left37 100 = 22 := by decide
+theorem left37_120 : left37 120 = 27 := by decide
+theorem left37_121 : left37 121 = 28 := by decide
 
 /-- Challenge definition (Comparator Live, "There Are Infinitely Many Primes"). -/
 def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n

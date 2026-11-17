@@ -38,3 +38,17 @@ def primesSpec (x : ℕ) : List ℕ :=
   (List.range (x + 1)).filter fun n => decide (n = 2 ∨ n = 3 ∨ n = 5 ∨ Survives n)
 
 theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x := sorry
+
+theorem sqrt_rule (x n : ℕ) (hn : 1 < n) (hx : n ≤ x)
+    (h : ∀ p, p.Prime → p * p ≤ x → ¬ p ∣ n) : n.Prime := sorry
+
+theorem square_not_prime (p : ℕ) (hp : p.Prime) : ¬ (p * p).Prime := sorry
+
+theorem square_needs_p (p q : ℕ) (hp : p.Prime) (hq : q.Prime) (h : q ∣ p * p) : q = p := sorry
+
+theorem three_seven_enough (n : ℕ) (h5 : 5 < n) (hn : n ≤ 120)
+    (hend : n % 10 = 1 ∨ n % 10 = 3 ∨ n % 10 = 7 ∨ n % 10 = 9)
+    (h3 : ¬ 3 ∣ n) (h7 : ¬ 7 ∣ n ∨ n = 7) : n.Prime := sorry
+
+theorem three_seven_fails_at_121 :
+    121 % 10 = 1 ∧ ¬ 3 ∣ 121 ∧ ¬ 7 ∣ 121 ∧ ¬ Nat.Prime 121 := sorry

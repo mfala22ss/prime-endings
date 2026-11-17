@@ -373,7 +373,7 @@ New primes join only at prime squares (9, 49, 121, 169, 289, 361, 529, 841, 961,
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of the run log below); stage L4 is PENDING until run 5.
+Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of the run log below). Stages L4 and L5 compile with no errors against a local Mathlib (ESTABLISHED locally); their Comparator runs (6 and 7) are PENDING.
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -386,6 +386,11 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | L3 | `infinitely_many_ending` | Infinitely many primes end in each of 1, 3, 7 and 9 (Mathlib's Dirichlet theorem) |
 | L3 | `survives_iff`, `mem_primesSpec` | Sieve correctness: the reference sieve lists exactly the primes up to x |
 | L4 | `prime_mod30` | Every prime above 5 leaves remainder 1, 7, 11, 13, 17, 19, 23 or 29 mod 30 |
+| L5 | `sqrt_rule` | If 1 < n ≤ x and no prime p with p x p ≤ x divides n, then n is prime: sieving by the primes up to √x is enough |
+| L5 | `square_not_prime`, `square_needs_p` | p x p is never prime and its only prime factor is p: leave p out and p x p survives, so every prime is needed from its square on |
+| L5 | `three_seven_enough` | Every n with 5 < n ≤ 120 ending in 1, 3, 7 or 9 and not a multiple of 3 or 7 (other than 7) is prime |
+| L5 | `three_seven_fails_at_121` | 121 ends in 1, is not a multiple of 3 or 7, and is not prime: 120 is the limit for 3 and 7 |
+| L5 | `left37_100`, `left37_120`, `left37_121` | The step-11 counting formula gives 22, 27 and 28 left after 3 and 7 |
 
 ### Run log
 
@@ -397,6 +402,8 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | 4 | Built-in "There Are Infinitely Many Primes" | L3 version, fixed (SHA-256 57b52a1d...) | Passed; the `#eval` cross-check printed `true` |
 | 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` and `wheelBenchmark` | Failed: the last step of `prime_mod30` (`omega` cannot combine "not divisible by 2, 3, 5" into the 8 remainders mod 30; Lean's `omega` is incomplete for this). The benchmark ran in the same run: ALL 4 CHECKS PASSED, every count equal to the Python values |
 | 6 | Built-in "There Are Infinitely Many Primes" | L4 fixed: `prime_mod30` splits into the 30 possible remainders; the fix was compiled first with a local Lean 4.35 | **Not yet run** |
+| local | (compile only) | L5 version: full `Solution.lean` and `Challenge.lean` (16 theorems) compiled against Mathlib (build files from `lake exe cache get`, Lean 4.34) | No errors; cross-check `true`; benchmark ALL 4 CHECKS PASSED |
+| 7 | Built-in "There Are Infinitely Many Primes" | L5 version | **Not yet run** |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
 
