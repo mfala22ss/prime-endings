@@ -162,7 +162,8 @@ All figures below are copied from [`results`](results), produced by the scripts 
 **What it means.**
 * Both formulas track the truth closely over nine powers of ten.
 * Our model's error grows steadily (+0.5% to +1.9%) because its constants were tuned to small x.
-* The theory's error shrinks steadily (−0.7% to −0.13%) because its constants are exact in the limit. The theory, which used no data at all, wins far from the training range.
+* The theory's error shrinks steadily (−0.7% to −0.13%) because its constants are exact in the limit.
+* **So, plainly: our model is worse than the theory beyond its training range.** At 10^4 it is the better of the two (−0.47% against −0.70%); at 10^6 they are about equal; from 10^8 on the theory is clearly better, and the gap widens with x. This is the expected result, not a failure. The point of fitting a model was to test whether the data alone would recover the law. It did recover the shape a / (ln x − b) and constants close to the true 2.5 and 1, but a fit to small numbers cannot match a formula that is exact for large ones.
 
 **Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against the local formula 2.5 / ln x):
 
@@ -203,25 +204,32 @@ The local share near 10^8 (13.58%) is lower than the average share up to 10^8 (1
 
 ### 4. Sieving the 40% leaves exactly the primes
 
-**What was measured.** Start from the 39,999,998 kept numbers up to 10^8. Cross out the multiples of 3, then 7, 11, 13, ..., up to 9,973, the largest prime below √10^8 = 10,000. After each prime, count what is left.
+This section has two separate things in it, and they must not be confused:
 
-**The product rule (a prediction to compare with).** Crossing out the multiples of p removes about 1 in p of what is left, so it keeps a fraction (1 − 1/p). The product rule multiplies these fractions: after 3 it predicts 39,999,998 × 2/3; after 3 and 7, × 2/3 × 6/7, and so on. It assumes the primes act independently, which is only approximately true.
+* **The sieve itself** is an exact procedure. It is not a model and makes no prediction; it either crosses a number out or it does not. Its result has **zero error**.
+* **The product rule** is a quick estimate, from 1874-era probability reasoning, of how many numbers the sieve *will* leave. It is not our model and not the theory formula from the earlier sections. It is shown only to see where a naive estimate breaks down.
 
-Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [`results/step7_audit.txt`](results/step7_audit.txt).
+**What was done.** Start from the 39,999,998 kept numbers up to x = 10^8. Cross out the multiples of 3, then of 7, 11, 13, and so on, up to 9,973, the largest prime below √10^8 = 10,000. (Why stop at √x: any composite number has a prime factor no bigger than its square root, so once every prime up to √x has been used, only primes can remain. This is proved in Lean as `sqrt_rule`.) After each prime, count what is left.
 
-| After removing multiples of | Numbers left | Product rule predicts | Prime share of what is left |
-|----------------------------|---------------:|-----------------------:|--------------------:|
-| (start: the 40%) | 39,999,998 | | 14.40% |
-| 3 | 26,666,665 | 26,666,665 | 21.6% |
-| 13 | 19,180,822 | 19,180,818 | 30.0% |
-| 97 | 12,029,474 | 12,031,728 | 47.9% |
-| 997 | 8,087,521 | 8,096,526 | 71.2% |
-| every prime up to 9,973 | **5,761,452** | 6,088,469 | **100%** |
+**The product rule.** A prime p divides about 1 in p numbers, so crossing out its multiples should keep a fraction (1 − 1/p) of what is left. Multiplying these fractions gives the estimate: after 3, 39,999,998 × 2/3; after 3 and 7, 39,999,998 × 2/3 × 6/7; and so on. This assumes that "divisible by 3", "divisible by 7", ... behave like independent coin flips.
 
-**What it means.**
-* The last row is the main result: what survives is exactly the 5,761,452 primes above 5 up to 10^8, checked number by number. No prime was lost and no composite survived. This is the sieve the Lean file later proves correct for every x.
-* The product rule is excellent at first and overshoots by **5.68%** at the end (6,088,469 ÷ 5,761,452 = 1.0568). That is not a bug. Mertens' theorem shows that this product, taken up to √x, always ends up about 1.12 times too large as x grows (the limit is 2e^−γ = 1.1229). The independence assumption breaks down when very many primes are used.
-* The paper in [`papers/zeta-map`](papers/zeta-map/zeta-map.pdf) quotes 5.6% for the same effect. It measures the overshoot at a different x (x = 9,973² instead of 10^8) and over all numbers instead of the 40%, so the two figures differ slightly; both are correct for their own x.
+Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [`results/step7_audit.txt`](results/step7_audit.txt). The last column is the error of the product rule, as defined in the formulas section.
+
+| Crossed out so far | Numbers left (exact, from the sieve) | Product rule estimate | Product rule error |
+|----------------------------|---------------:|-----------------------:|----------:|
+| (start: the 40%) | 39,999,998 | | |
+| 3 | 26,666,665 | 26,666,665 | 0.000% |
+| 3 to 13 | 19,180,822 | 19,180,818 | 0.000% |
+| 3 to 31 | 15,285,217 | 15,285,214 | 0.000% |
+| 3 to 97 | 12,029,474 | 12,031,728 | +0.019% |
+| 3 to 997 | 8,087,521 | 8,096,526 | +0.111% |
+| 3 to 9,973 (all primes up to √x) | **5,761,452** | 6,088,469 | **+5.68%** |
+
+**How to read it.**
+1. **The sieve is exact.** The 5,761,452 numbers left at the end are exactly the primes above 5 up to 10^8, checked one by one against an independent prime list. No prime was lost, no composite survived.
+2. **The product rule is excellent while the primes used are small, and fails at the end.** Up to 997 (a tenth of √x) it is within 0.11%. Using the last primes, from 997 up to 9,973, its error jumps to +5.68%. The reason: the coin-flip assumption only holds while the primes used are much smaller than √x. Near √x the events stop being independent (for example, a number below 10^8 cannot be divisible by two different primes that are both above 10,000). Mertens' theorem (1874) shows that, used all the way to √x, the product rule always ends up too high, by a factor that approaches 2e^−γ = 1.1229 (12.3% too high) as x grows. At 10^8 it has reached 5.68% on its way there.
+3. **The right formula for the final count is the theory, not the product rule.** The theory formula from section 1, 2.5 / (ln x − 1) × 39,999,998, gives 5,740,304 survivors, an error of −0.37%. That is the prime number theorem; the product rule is a different, cruder estimate.
+4. The paper in [`papers/zeta-map`](papers/zeta-map/zeta-map.pdf) quotes the overshoot as 5.6%. It measures it at x = 9,973² instead of 10^8, and over all numbers instead of the 40%, so the figure differs slightly. Both are correct for their own x.
 
 ### 5. Spacing between primes ending in 1
 
@@ -243,18 +251,39 @@ Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [
 
 ### 6. Bigger filters: precision and recall
 
-**What was measured.** The 40% filter is "keep numbers coprime to 10". Larger filters keep numbers coprime to 30, 210 or 2310 (removing multiples of 3, of 3 and 7, and so on). For each: **recall**, the share of primes (above the filter's own primes) that the filter keeps; and **precision**, the share of kept numbers that are prime. Source: [`results/step8_precision_recall_wheels.txt`](results/step8_precision_recall_wheels.txt).
+**The idea.** The 40% filter keeps the numbers that share no factor with 10, that is, not divisible by 2 or 5. The same idea works with a bigger number m in place of 10: keep only the numbers that share no factor with m. In computing this kind of filter is called a **wheel**, and m is its size. Four wheels were tested:
 
-| Filter | Keeps | Precision at 10^8 | Theory | Recall |
-|---|---:|---:|---:|---:|
-| mod 10 | 40.0% | 14.40% | 14.35% | 100% |
-| mod 30 | 26.7% | 21.61% | 21.53% | 100% |
-| mod 210 | 22.9% | 25.21% | 25.11% | 100% |
-| mod 2310 | 20.8% | 27.73% | 27.63% | 100% |
+| Wheel | Removes multiples of | Remainders kept (out of m) | Fraction of numbers kept |
+|---|---|---|---:|
+| mod 10 | 2, 5 | 4 of 10: 1, 3, 7, 9 | 40.0% |
+| mod 30 | 2, 3, 5 | 8 of 30: 1, 7, 11, 13, 17, 19, 23, 29 | 26.7% |
+| mod 210 | 2, 3, 5, 7 | 48 of 210 | 22.9% |
+| mod 2310 | 2, 3, 5, 7, 11 | 480 of 2,310 | 20.8% |
 
-The theory column is boost / (ln x − 1), where the boost is how much the filter concentrates primes: 2.5 for mod 10, 3.75 for mod 30, 4.375 for mod 210, 4.8125 for mod 2310 (each is the modulus divided by how many remainders it keeps).
+**The three terms, precisely.** Each wheel keeps a set of **candidates** (the numbers it does not throw away).
 
-**What it means.** Every filter keeps all primes. Bigger filters raise precision, but with diminishing returns. In practice they save little time: finding all primes in a million numbers above 10^12 by testing only the kept candidates was only 1.11 (mod 10) to 1.19 (mod 2310) times faster than testing every number, because a primality test rejects multiples of 2, 3 and 5 almost instantly anyway.
+* **Recall** = (primes among the candidates) ÷ (all primes the wheel could have kept). "Could have kept" means every prime up to x except the wheel's own small primes, which every wheel removes by design and adds back by hand (2, 3 and 5 for mod 30, and so on). Recall answers: *did the filter lose any prime?* 100% means none.
+* **Precision** = (primes among the candidates) ÷ (number of candidates). It answers: *if I pick a candidate, how likely is it to be prime?* It is the same quantity as the average share in section 1, just for a different wheel.
+* **Boost** = m ÷ (remainders kept). It is how many times more concentrated the primes become after filtering: the wheel keeps only 1/boost of all numbers, but keeps every prime, so the share of primes rises by the factor boost. For mod 10, 10 ÷ 4 = 2.5 (the familiar 2.5); mod 30, 30 ÷ 8 = 3.75; mod 210, 210 ÷ 48 = 4.375; mod 2310, 2,310 ÷ 480 = 4.8125.
+
+**The theory column.** Without any filter, the share of primes among all numbers up to x is about 1 / (ln x − 1) (the prime number theorem). A wheel multiplies that share by its boost, so the predicted precision is **boost ÷ (ln x − 1)**. At x = 10^8, ln x − 1 = 17.42, so mod 10 predicts 2.5 ÷ 17.42 = 14.35% and mod 30 predicts 3.75 ÷ 17.42 = 21.53%. For mod 10 this is exactly the theory formula 2.5 / (ln x − 1) from section 1. It is derived, not fitted.
+
+Source: [`results/step8_precision_recall_wheels.txt`](results/step8_precision_recall_wheels.txt), at x = 10^8:
+
+| Wheel | Candidates | Primes among them | Precision (measured) | Precision (theory: boost ÷ (ln x − 1)) | Recall |
+|---|---:|---:|---:|---:|---:|
+| mod 10 | 39,999,998 | 5,761,452 | 14.40% | 14.35% | 100% (0 primes missed) |
+| mod 30 | 26,666,665 | 5,761,452 | 21.61% | 21.53% | 100% (0 missed) |
+| mod 210 | 22,857,141 | 5,761,451 | 25.21% | 25.11% | 100% (0 missed) |
+| mod 2310 | 20,779,220 | 5,761,450 | 27.73% | 27.63% | 100% (0 missed) |
+
+(The prime count falls by one for mod 210 and again for mod 2310 because 7 and then 11 become "the wheel's own primes", handled by hand.)
+
+**What it means.**
+* **No wheel loses a prime** (recall 100%), as the Lean theorems `prime_ending` and `prime_mod30` prove for mod 10 and mod 30.
+* **Bigger wheels raise precision, with diminishing returns:** 14.4% → 21.6% → 25.2% → 27.7%. Going from mod 10 to mod 30 removes a third of the candidates; going from mod 210 to mod 2310 removes only a tenth.
+* **The theory predicts every precision to within 0.6%** (relative), with nothing fitted.
+* **In practice, the time saved is small.** Finding every prime in the million numbers above 10^12 by running a primality test on each candidate took 1.08 s with no filter and 0.97 s (mod 10) to 0.90 s (mod 2310), a speed-up of only 1.11 to 1.19 times. A primality test already rejects a multiple of 2, 3 or 5 almost instantly, so throwing those numbers away in advance saves little. The filter matters much more for sieving, where every candidate costs memory and work.
 
 ### 7. Very large numbers
 
