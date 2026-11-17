@@ -1,0 +1,23 @@
+PART A1: s = 1, removing one prime at a time (share of numbers kept)
+   remove multiples of  2: x (1 - 1/2) -> 50.0% kept
+   remove multiples of  5: x (1 - 1/5) -> 40.0% kept
+   remove multiples of  3: x (1 - 1/3) -> 26.6667% kept
+   remove multiples of  7: x (1 - 1/7) -> 22.8571% kept
+   remove multiples of 11: x (1 - 1/11) -> 20.7792% kept
+
+PART A2: s = 2, the sum 1 + 1/4 + 1/9 + 1/16 + ... and the 40% part of it
+   all numbers:            zeta(2) = pi^2 / 6           = 1.64493406685
+   drop even numbers:      x (1 - 1/4)  = x 3/4          = 1.23370055014
+   drop multiples of 5:    x (1 - 1/25) = x 24/25        = 1.18435252813
+   first terms of the 40% sum: 1/1^2 + 1/3^2 + 1/7^2 + 1/9^2 + 1/11^2 + 1/13^2 + ...
+   those 6 terms already add to 1.1580466
+
+PART B: finding the zeros by sign changes of Z(t)
+   zeros found by sign change up to T = 300: 138
+   exact number of zeros up to T (argument principle): 138
+   Riemann-von Mangoldt estimate: 137.712
+   all found, none missed: PASS
+   first five found:   14.13472514, 21.02203964, 25.01085758, 30.42487613, 32.93506159
+   mpmath.zetazero:    14.13472514, 21.02203964, 25.01085758, 30.42487613, 32.93506159
+   largest difference (every 10th zero checked): 1.96e-19
+   closest pair of zeros below 300: gap 0.60789; average gap near 300: 1.6253

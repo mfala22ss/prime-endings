@@ -373,6 +373,20 @@ The zeta function takes a number s and returns ζ(s) = 1 + 1/2^s + 1/3^s + ... E
 
 ---
 
+## Step 13. Simple zeta workings, and finding the zeros ourselves
+
+**Built.** [`python/steps/step13_find_zeros.py`](python/steps/step13_find_zeros.py) ([output](results/step13_find_zeros.txt)).
+
+**s = 1, one prime at a time.** Each Euler factor (1 − 1/p) is the share a wheel keeps: x 1/2 gives 50%, x 4/5 gives 40% (the 40% filter), x 2/3 gives 26.67% (mod 30), x 6/7 gives 22.86% (mod 210), x 10/11 gives 20.78% (mod 2310). These are exactly the kept shares measured in step 8.
+
+**s = 2, one multiplication at a time.** ζ(2) = 1 + 1/4 + 1/9 + ... = π²/6 = 1.64493406685. Dropping the even numbers multiplies by 3/4 (1.23370055014); dropping the multiples of 5 multiplies by 24/25 (1.18435252813). That is the sum of 1/n² over the numbers ending in 1, 3, 7, 9 (here the number 1 is included, and 3 counts as ending in 3).
+
+**Finding the zeros.** Hardy's function Z(t) is real and |Z(t)| = |ζ(1/2 + it)|, so every sign change of Z is a zero on the critical line. Scanning t from 1 to 300 in steps of 0.02 and refining each sign change found 138 zeros. The exact number of zeros up to 300, counted independently by the argument principle, is 138, so none were missed (the Riemann-von Mangoldt formula estimates 137.7). Every 10th zero agrees with `mpmath.zetazero` to 2 x 10^−19. The closest pair below 300 is 0.608 apart; the average gap near 300 is 1.625.
+
+**Scaling up.** Large computations use the same idea with faster evaluation of Z (the Riemann-Siegel formula, and the Odlyzko-Schönhage algorithm for many points at once) and a count check (Turing's method) to prove no zero was skipped. All zeros up to height 3 x 10^12 have been verified to lie on the critical line (Platt and Trudgian, 2021). There are infinitely many zeros, so they can never all be listed; the Riemann hypothesis is the statement that every one of them has real part 1/2.
+
+---
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
