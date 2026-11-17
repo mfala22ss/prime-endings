@@ -382,7 +382,7 @@ Two short papers in journal format, written for an academic reader with no names
 **What verification does and does not give.**
 
 * It guarantees the proofs are correct. Nothing is assumed or skipped.
-* It does not guarantee that a self-written challenge says what was intended. That is why the local challenge must be marked "trusted" by the person running it, and why the built-in challenge carries more weight.
+* It does not guarantee that a challenge states what was intended. This only matters for a challenge you write yourself: Comparator then asks you to confirm you "trust" it, because it can check the proof against the statement but not the statement against your intention. The site's built-in challenge does not have this weakness, since its statement is the site's own. In this project, a self-written challenge was used once, in run 1 on 15 November 2026 (6 theorems, after confirming trust); every run since has used the site's built-in "There Are Infinitely Many Primes" challenge.
 * The `#eval` lines that print reports are computations, not proofs. Their results are checked separately, against primecount and sympy.
 
 ---
