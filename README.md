@@ -453,6 +453,7 @@ Two short papers in journal format, written for an academic reader with no names
 | `steps/step11_three_and_seven.py` | The square-root rule worked for 3 and 7, with formulas checked for every x up to 100,000 | 1 s |
 | `steps/step12_zeta_map.py` | The 40% filter, the sieve and the endings as pieces of the zeta function | 2 s |
 | `steps/step14_method_to_1e10.py` | Runs our three-step method itself to 10^10 in blocks; compares with primecount and with our model's prediction | 1 min |
+| `steps/step16_huge_numbers.py` | Our method on a 42,000-digit window: strips the 60%, counts multiples by formula, partial sieve to 10^6 | 2 s |
 | `steps/step13_find_zeros.py` | Zeta workings step by step; finds all 138 zeros up to height 300 and proves none were missed | 1 min |
 | `make_prime_tables.py` | Writes `data/primes_40pct_up_to_1e6.csv` and `data/breakdown_by_ending.csv` | 1 min |
 | `extras/density_models.py` | Compares fitted models with li(x), Riemann's R(x) and up to 1,000 zeta-zero waves | 6 s |

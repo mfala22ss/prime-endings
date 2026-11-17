@@ -429,6 +429,19 @@ Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61
 
 Status: ESTABLISHED by this run. The method gives the exact prime count at every checkpoint, and the prediction is within 0.4%, improving with x.
 
+## Step 16. The method on a 42,000-digit number
+
+**What was asked.** For a number with tens of thousands of digits, how can the 60% be stripped, and how can the multiples be found and counted?
+
+**What was done.** [`python/steps/step16_huge_numbers.py`](python/steps/step16_huge_numbers.py) takes the window of 100,000 numbers starting at a = 10^41999, which has exactly 42,000 digits ([`results/step16_huge_numbers.txt`](results/step16_huge_numbers.txt), 1.3 seconds).
+
+1. **Strip the 60%:** by the last digit only. 40,000 of the 100,000 numbers are kept.
+2. **Count the multiples of p without listing them:** the multiples of p that end in 1, 3, 7, 9 in [a, b] are p × k with k from ⌈a/p⌉ to ⌊b/p⌋ and k ending in 1, 3, 7, 9, so their number is K(⌊b/p⌋) − K(⌈a/p⌉ − 1), with K(y) = 4⌊y/10⌋ + (how many of 1, 3, 7, 9 are ≤ the last digit of y). One division per prime. Checked against crossing them out one by one: 13,332 for p = 3, 5,715 for p = 7, 3,637 for p = 11, 40 for p = 997, 0 for p = 999,983. All equal.
+3. **Cross out the multiples of every prime up to 1,000,000** (78,496 primes). 4,094 numbers survive; the product rule estimated 4,064.
+4. **What this cannot do:** a full sieve needs every prime up to √a, a 21,000-digit number; there are far too many of them to list. The window is expected to hold about 100,000 / ln a = 100,000 / 96,709 ≈ 1 prime, so about 1 survivor in 4,000 is prime. The survivors must each be checked with a primality test (Miller-Rabin, as in the Lean report).
+
+Status: ESTABLISHED by this run for steps 1 to 3; step 4 is the known limit of sieving.
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).

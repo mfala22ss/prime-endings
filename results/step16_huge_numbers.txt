@@ -1,0 +1,17 @@
+a = 10^41999 (42,000 digits); window of 100,000 numbers
+step 1: kept 40,000 numbers ending in 1, 3, 7, 9 (40.0%), by the last digit alone
+
+step 2: how many multiples of p lie in the window and end in 1, 3, 7, 9?
+        p   formula  crossed one by one  equal
+        3    13,332              13,332   True
+        7     5,715               5,715   True
+       11     3,637               3,637   True
+      997        40                  40   True
+  999,983         0                   0   True
+
+step 3: crossed out the multiples of the 78,496 primes from 3 to 1,000,000 (not 5)
+        survivors: 4,094   product-rule estimate: 4,064
+        primes expected in the window: W / ln a = 100,000 / 96,709 = 1.03
+        so about 1 survivor in 3,959 is prime; the rest need a primality test
+        a full sieve would need every prime up to sqrt(a), a 21,000-digit number
+time: 1.3 s
