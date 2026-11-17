@@ -252,16 +252,20 @@ A full sieve would need every prime up to the square root of 10^29 (316,227,766,
 
 ---
 
-## Tables: the multiples of 3
+## Tables: the multiples of 3 and 7
 
-**Built.** [`python/tables/multiples_of_3.py`](python/tables/multiples_of_3.py), producing [`docs/tables/Multiples_of_3.pdf`](docs/tables/Multiples_of_3.pdf) and [`data/multiples_of_3_33x33.csv`](data/multiples_of_3_33x33.csv).
+**Built.** [`python/tables/multiples.py`](python/tables/multiples.py), producing [`docs/tables/Multiples.pdf`](docs/tables/Multiples.pdf) and the grids as CSV ([3](data/multiples_of_3_33x33.csv), [7](data/multiples_of_7_33x33.csv)).
 
-* Page 1: the 111 multiples of 3 up to 333, in rows of 10. 44 of them end in 1, 3, 7 or 9.
-* Page 2: a 33 x 33 grid, the first 1,089 multiples of 3 (3 to 3,267). 435 of them end in 1, 3, 7 or 9.
+For each prime, the first 111 multiples in rows of 10, then a 33 x 33 grid of the first 1,089 multiples. Amber cells are inside the 40% and crossed out first by that prime in the sieve; grey cells are inside the 40% but were already crossed out by 3.
 
-Highlighted cells are the multiples of 3 that fall inside the 40%. They are exactly the non-primes that the prime 3 crosses out in the sieve (from 9 = 3 x 3 onwards). In every block of 10 consecutive multiples, 4 are highlighted: 3 x k ends in 1, 3, 7 or 9 exactly when k does.
+| Table | Multiples | Crossed out first by this prime | Already removed by 3 |
+|---|---:|---:|---:|
+| 3, up to 333 | 111 | 44 | 0 |
+| 3, 33 x 33 (to 3,267) | 1,089 | 435 | 0 |
+| 7, up to 777 | 111 | 29 | 15 |
+| 7, 33 x 33 (to 7,623) | 1,089 | 289 | 146 |
 
----
+In every row of 10 multiples, 4 land in the 40% (p x k ends in 1, 3, 7 or 9 exactly when k does). For 7, about one third of those are also multiples of 3, so 7 is left with the other two thirds: the 1/7 x 2/3 share seen in step 10.
 
 ## The Lean proofs, in the order they were built
 
