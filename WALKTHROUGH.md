@@ -277,6 +277,7 @@ In every row of 10 multiples, 4 land in the 40% (p x k ends in 1, 3, 7 or 9 exac
 * Any set of numbers whose multiples are coloured, each with its own colour; shared multiples are striped. Presets: 3 and 7; 2, 3, 5, 7; and "Sieve primes" (every prime up to the square root of the last number).
 * Two modes: every multiple, or sieve mode, where each number is coloured only by the smallest number that crosses it out (starting at that number squared), so the uncoloured cells are the primes.
 * Play, Step, Reset and Show all, with a speed control; multiples appear one at a time. With the system's reduced-motion setting, they appear without animation.
+* Non-primes that no chosen number divides get a dashed outline, and a warning lists them with their factors (for 3 and 7 on 1 to 200: 121 = 11 x 11, 143 = 11 x 13, 169 = 13 x 13, 187 = 11 x 17) and the primes to add. This is the square-root rule: 3 and 7 cover the 40% only up to 120; from 121 = 11 x 11 the prime 11 is needed, and from 169 the prime 13.
 * A switch, "Colour only multiples inside the 40%", limits the colouring, the play sequence and the "caught first" counts to multiples ending in 1, 3, 7 or 9.
 * Clicking a number shows its factors, whether it is in the 40%, and what caught it; double-clicking adds it as a divisor. A table counts the multiples, those in the 40%, and those caught first.
 
