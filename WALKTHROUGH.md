@@ -417,6 +417,8 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | L1 | `removed_not_prime` | No number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime |
 | L1 | `smallest_factor_le_sqrt` | A composite's smallest prime factor, squared, is at most the number |
 | L1 | `density_factor`, `prime_97`, `not_prime_91` | 1 / 0.4 = 5/2; 97 is prime; 91 is not |
+| L1 | `candidateCount_100`, `candidateCount_1e10` | The candidate-count formula gives 38 at 100 and 3,999,999,998 at 10^10 |
+| L1 | `record_digits`, `first_exponent_100M` | With a 40-digit log10 2: the record prime has 41,024,320 digits; 332,192,807 is the first exponent with 100 million digits |
 | L2 | `candidate_prime_above` | Infinitely many primes lie in the 40% (Euclid's argument with 10 · (n + 5)! + 1) |
 | L2 | `InfinitudeOfPrimes` | Comparator Live's built-in challenge: infinitely many primes |
 | L3 | `infinitely_many_ending` | Infinitely many primes end in each of 1, 3, 7 and 9 (Mathlib's Dirichlet theorem) |
@@ -427,6 +429,8 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | L5 | `three_seven_enough` | Every n with 5 < n ≤ 120 ending in 1, 3, 7 or 9 and not a multiple of 3 or 7 (other than 7) is prime |
 | L5 | `three_seven_fails_at_121` | 121 ends in 1, is not a multiple of 3 or 7, and is not prime: 120 is the limit for 3 and 7 |
 | L5 | `left37_100`, `left37_120`, `left37_121` | The step-11 counting formula gives 22, 27 and 28 left after 3 and 7 |
+
+<a id="run-log"></a>
 
 ### Run log
 

@@ -37,13 +37,13 @@ Up to **x = 10,000,000,000**, as shares of all numbers (counted exactly; [`data/
 | Ends in 7 | 1,000,000,000 | 1.1376% | 8.8624% | 10% |
 | Ends in 9 | 1,000,000,000 | 1.1376% | 8.8624% | 10% |
 | **Kept (40%)** | **3,999,999,998** | **4.5505%** | **35.4495%** | **40%** |
-| Even numbers | 5,000,000,000 | only the prime 2 | 4,999,999,999 | 50% |
-| Ends in 5 | 1,000,000,000 | only the prime 5 | 999,999,999 | 10% |
-| The numbers 1 and 3 | 2 | only the prime 3 | 1 | 0% |
-| **Removed (60%)** | **6,000,000,002** | **3 primes** | **5,999,999,999** | **60%** |
+| Even numbers | 5,000,000,000 | the prime 2 (kept) | 4,999,999,999 | 50% |
+| Ends in 5 | 1,000,000,000 | the prime 5 (kept) | 999,999,999 | 10% |
+| The numbers 1 and 3 | 2 | the prime 3 (kept) | 1 | 0% |
+| **Removed (60%)** | **6,000,000,002** | **3 primes, kept separately** | **5,999,999,999** | **60%** |
 | **All numbers** | **10,000,000,000** | **4.5505%** | **95.4495%** | **100%** |
 
-So the filter keeps 40% of the numbers and loses no prime above 5. Within the kept 40%, **11.38%** are prime at this size (4.5505 / 40), and that share keeps falling as x grows.
+So the filter keeps 40% of the numbers plus the primes 2, 3 and 5, and loses no prime: the prime count is always 3 + the primes in the 40%. Within the kept 40%, **11.38%** are prime at this size (4.5505 / 40), and that share keeps falling as x grows.
 
 ---
 
@@ -130,21 +130,38 @@ The Lean report lists primes in windows at any size. In the 100,000 numbers from
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and the latest Mathlib on [Comparator Live](https://comparator.live.lean-lang.org).
 
-| Theorem | Statement in plain words |
-|------------------------|--------------------------------------------------------|
-| `prime_ending` | Every prime above 5 ends in 1, 3, 7 or 9. |
-| `prime_mod30` | Every prime above 5 leaves remainder 1, 7, 11, 13, 17, 19, 23 or 29 when divided by 30: the mod-30 wheel loses no prime. Added after step 8; Comparator run pending. |
-| `removed_not_prime` | No number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime. The removed 60% holds no primes above 5. |
-| `smallest_factor_le_sqrt` | A composite number's smallest prime factor, squared, is at most the number. This is why the sieve may stop at the square root. |
-| `candidate_prime_above` | For every n there is a prime above n ending in 1, 3, 7 or 9. So the 40% holds infinitely many primes. |
-| `InfinitudeOfPrimes` | For every n there is a prime above n (Comparator Live's built-in challenge). |
-| `infinitely_many_ending` | For **each** of 1, 3, 7 and 9, infinitely many primes end in it (from Mathlib's Dirichlet theorem). |
-| `survives_iff` | A number survives sieving the 40% (no prime p with p x p ≤ n divides it) exactly when it is a prime above 5. |
-| `mem_primesSpec` | **Sieve correctness:** the reference sieve `primesSpec x` lists exactly the primes up to x: `n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x`. |
-| `density_factor` | 1 / 0.4 = 5/2, the source of the 2.5. |
-| `prime_97`, `not_prime_91` | 97 is prime; 91 = 7 x 13 is not. |
-| `candidateCount_100`, `candidateCount_1e10` | The counting formula gives 38 kept numbers at 100 and 3,999,999,998 at 10^10. |
-| `record_digits`, `first_exponent_100M` | With a 40-digit value of log10 2: the record prime 2^136,279,841 - 1 has 41,024,320 digits, and 332,192,807 is the first exponent with 100 million digits. |
+**What the proofs establish** (all 24 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
+
+**The filter**
+* Every prime above 5 ends in 1, 3, 7 or 9 (`prime_ending`).
+* No number above 5 in the thrown-away 60% is prime (`removed_not_prime`).
+* The stricter mod-30 filter loses no prime either (`prime_mod30`).
+
+**The sieve**
+* Every composite n has a prime factor whose square is at most n (`smallest_factor_le_sqrt`).
+* Crossing out the multiples of the primes up to √x leaves only primes (`sqrt_rule`).
+* Each prime is needed from its square on: p × p is never prime, and only p divides it (`square_not_prime`, `square_needs_p`).
+* A number survives the sieve on the 40% if and only if it is a prime above 5 (`survives_iff`): no prime is lost and no composite gets through.
+* The reference sieve lists exactly the primes up to x (`mem_primesSpec`).
+* Within the 40%, crossing out 3 and 7 alone is enough up to 120 (`three_seven_enough`) and first fails at 121 = 11 × 11 (`three_seven_fails_at_121`).
+
+**Infinitely many primes**
+* There is always a prime above any n inside the 40% (`candidate_prime_above`).
+* So there are infinitely many primes (`InfinitudeOfPrimes`, Comparator Live's built-in challenge).
+* Each of the endings 1, 3, 7 and 9 has infinitely many primes (`infinitely_many_ending`, from Mathlib's Dirichlet theorem).
+
+**Checked numbers**
+* 1 ÷ 0.4 = 2.5 (`density_factor`); 97 is prime and 91 is not (`prime_97`, `not_prime_91`).
+* 38 candidates up to 100 and 3,999,999,998 up to 10^10 (`candidateCount_100`, `candidateCount_1e10`).
+* Crossing out 3 and 7 leaves 22 numbers up to 100, 27 up to 120 and 28 up to 121, because 121 wrongly survives (`left37_100`, `left37_120`, `left37_121`).
+* With a 40-digit value of log10 2, the record prime 2^136,279,841 − 1 has 41,024,320 digits, and 332,192,807 is the first exponent giving 100 million digits (`record_digits`, `first_exponent_100M`).
+
+**What the proofs do not establish**
+* The density formulas 2.5 / (ln x − 1) and li(x).
+* The sieve on a window [a, b] with a > 1 (checked by computation only).
+* That the fast array code equals the reference sieve (compared up to 3,000 only).
+* The `#eval` outputs, which are computations, not proofs.
+* Anything new: all of these are known results.
 
 ### Proof 1: why every prime above 5 ends in 1, 3, 7 or 9
 
