@@ -42,7 +42,7 @@ A prime is a whole number above 1 whose only divisors are 1 and itself: 2, 3, 5,
 So if you want to find primes, you can throw away 60% of all numbers at once and lose nothing except 2 and 5, which you keep by hand (3 is kept by hand too, for a reason explained in the next section). This project asks what happens next:
 
 * How many of the remaining 40% are prime, and how does that share change as numbers get bigger?
-* Can the share be predicted, by a formula from theory and by a model trained on data, and which predicts better?
+* Can the share be predicted from mathematics, using only what our filter does plus the prime number theorem? And does a curve fitted to data alone agree?
 * Do the four endings 1, 3, 7, 9 get equal shares of the primes?
 * How do you get from the 40% down to exactly the primes (the sieve), and can that be proved correct by a computer?
 
@@ -68,29 +68,39 @@ The prime 3 ends in 3 but is not "above 5", so it is counted with 2 and 5 as one
 * **Average share up to x**: (kept primes) ÷ (kept numbers). Out of all the kept numbers from 6 to x, what fraction is prime? At x = 100 it is 22 / 38 = 57.9%. This is what the main tables report.
 * **Local share near x**: the same fraction, but counted only in a narrow window just below x (for example the last million numbers). It answers "if I pick a kept number of about this size, how likely is it to be prime?" It is always a little lower than the average share, because the average includes the smaller numbers, where primes are more common.
 
-### Three formulas, and how they differ
+### Our model: the method, and the density it predicts
 
-**1. Theory, average share: 2.5 / (ln x − 1)**
-* Predicts the average share up to x.
-* Derived, nothing fitted. The prime number theorem gives π(x) ≈ x / (ln x − 1), and there are about 0.4 x kept numbers, so the share is [x / (ln x − 1)] ÷ 0.4 x = 2.5 / (ln x − 1).
-* The 2.5 is 1 ÷ 0.4: the same primes packed into 40% of the numbers.
+**Our model is the method itself**, in three steps:
 
-**2. Theory, local share: 2.5 / ln x**
-* Predicts the local share near x.
-* Derived, nothing fitted. Near x, a random whole number is prime with probability about 1 / ln x; inside the 40% that becomes 2.5 / ln x.
+1. Take every number from 1 to x.
+2. Strip the 60%: keep only the numbers above 5 that end in 1, 3, 7 or 9, and set 2, 3 and 5 aside as known primes.
+3. Cross out the multiples of every prime from 3 up to √x (skipping 5, whose multiples are already gone).
 
-**3. Our model: 2.5694 / (ln x − 0.7918)**
-* Predicts the average share up to x, like formula 1.
-* **Fitted to data.** We assumed the shape a / (ln x − b) and let the computer choose a and b to match the measured average share at 200 values of x between 1,000 and 400,000, and nothing larger.
+What is left, plus 2, 3 and 5, is **exactly** the list of primes up to x. This part is not an estimate: it is checked number by number up to 10^8 (results, section 4) and proved for every x in Lean (`survives_iff`, `window_sieve`).
+
+**The density the model predicts, from mathematics alone, with nothing trained.** How many of the kept numbers will be prime? The answer has two factors, and it matters where each one comes from:
+
+| Factor | Value | Where it comes from |
+|---|---|---|
+| Concentration from step 2 | **2.5** | **Our filter.** It keeps 4 of every 10 numbers (40%) and loses no prime above 5, so primes become 10 ÷ 4 = 2.5 times more common among what is kept. This is exact arithmetic, proved in Lean (`prime_ending`, `removed_not_prime`). |
+| Share of primes among all numbers up to x | **1 / (ln x − 1)** | **The prime number theorem** (Hadamard and de la Vallée Poussin, 1896), which gives π(x) ≈ x / (ln x − 1). This factor cannot come from our filter, because the filter only knows about 2 and 5. |
+
+Multiplying them gives **our model's prediction**:
+
+* **Average share up to x = 2.5 / (ln x − 1)**
+* **Local share near x = 2.5 / ln x** (near x, a number is prime with probability about 1 / ln x; inside the 40%, 2.5 times that).
+
+**Why not get the second factor from step 3 as well?** Step 3 crosses out a fraction 1/p for each prime p, so it is tempting to predict the density by multiplying (1 − 1/p) over the primes up to √x. That "product rule" is tested in results section 4: it is almost perfect for small primes but ends up 5.68% too high at 10^8, and Mertens' theorem shows the error grows to 12.3% in the limit. So the counting of step 3 needs the prime number theorem to come out right. Our steps tell you *which* numbers are prime exactly; the prime number theorem tells you *how many* there will be.
 
 ln x is the natural logarithm of x (ln 10 ≈ 2.3026, ln 10^8 ≈ 18.42). It grows very slowly, which is why the share falls slowly.
 
-**The model and the theory have the same shape.** Our model "rediscovered" the form a / (ln x − b). The difference is in the two numbers:
+### A side experiment: a curve fitted to data (not the model)
 
-* The theory's 2.5 and 1 come from mathematics and are correct for all large x.
-* The model's 2.5694 and 0.7918 were tuned to small numbers (up to 400,000), where the true share behaves slightly differently. So the model is very accurate near its training range and drifts slowly away from the truth beyond it, while the theory gets more accurate the larger x is. The results table shows exactly that.
+Before using the mathematics, we tested whether the data alone would lead to the same formula. We gave the computer only the measured average shares at 200 values of x between 1,000 and 400,000, told it to fit the shape a / (ln x − b), and let it choose a and b. It returned **2.5694 / (ln x − 0.7918)**: the same shape as our model's 2.5 / (ln x − 1), with constants close to 2.5 and 1.
 
-**How the model was fitted.** If share = a / (ln x − b), then 1 / share = (1/a) ln x − b/a, which is a straight line in ln x. An ordinary straight-line fit (least squares) of 1 / share against ln x gives the slope and intercept, and from them a and b. Script: [`python/steps/step1_density.py`](python/steps/step1_density.py).
+Fitting method: if share = a / (ln x − b), then 1 / share = (1/a) ln x − b/a, a straight line in ln x, so an ordinary least-squares line through the 200 points gives a and b. Script: [`python/steps/step1_density.py`](python/steps/step1_density.py).
+
+This fitted curve is **only a check**. It confirms that the data point to our model's formula, but because its constants were tuned to small numbers it drifts as x grows, so all predictions in this project use the derived 2.5 / (ln x − 1) and 2.5 / ln x.
 
 **"Error" in every table means relative error:** (prediction − true value) ÷ true value. +1.19% means the prediction is 1.19% too high.
 
@@ -127,8 +137,8 @@ The project grew one question at a time. Each step has a script in [`python/step
 
 | Step | Question | Method | Answer |
 |-------|----------------------------|-----------------------|--------------------------------------------------|
-| 1 | Can the share of primes in the 40% be predicted? | Fit our model on x ≤ 400,000; compare it and the theory with true counts | Yes. The model stays within 2% out to 10^13; the theory is within 0.13% there |
-| 2 | How does the share change each time x grows ten-fold? | Measure the drop per power of ten; compare with the theory | The drop shrinks every time, by about ln 10 / ln x |
+| 1 | Can the share of primes in the 40% be predicted? | Compare our model's derived formula 2.5 / (ln x − 1), and a curve fitted to x ≤ 400,000, with true counts | Yes. Our model's formula is within 0.13% at 10^13; the fitted curve agrees in shape and stays within 2% |
+| 2 | How does the share change each time x grows ten-fold? | Measure the drop per power of ten; compare with our model's prediction | The drop shrinks every time, by about ln 10 / ln x |
 | 3 | Does it hold up to 10 trillion? | Exact prime counts from primecount | Yes. 346,065,536,836 of the 3,999,999,999,998 kept numbers up to 10^13 are prime (8.65%) |
 | 4 | Do the four endings behave the same? | Count primes by ending up to 10^10 with a segmented sieve | Almost exactly: 11.376% each. Endings 1 and 9 sit very slightly lower (Chebyshev's bias) |
 | 5 | How are primes ending in 1 spaced? | Every gap between consecutive primes ending in 1 near 10^9; two models compared | Average gap 4 ln x; gaps divisible by 30 strongly favoured, as Hardy and Littlewood predicted |
@@ -145,29 +155,28 @@ A Lean 4 file then proves the central facts formally; see [The Lean proofs](#the
 
 All figures below are copied from [`results`](results), produced by the scripts in this repository.
 
-### 1. The share of primes in the 40% falls, and can be predicted
+### 1. The share of primes in the 40% falls, exactly as our model predicts
 
-**What was measured.** The average share up to x (kept primes ÷ kept numbers) for x = 10^4 to 10^13.
+**What was measured.** The average share up to x (kept primes ÷ kept numbers) for x = 10^4 to 10^13, compared with our model's prediction 2.5 / (ln x − 1) and with the fitted curve from the side experiment.
 
-**How.** Exact prime counts: a sieve up to 10^8, the program primecount above that. Both are cross-checked where they overlap. Our model was fitted on x from 1,000 to 400,000 only, so every row from 10^6 on is a genuine test on numbers it never saw. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
+**How.** Exact prime counts: a sieve up to 10^8, the program primecount above that, cross-checked where they overlap. Our model's prediction uses no data at all. The fitted curve saw only x between 1,000 and 400,000, so every row from 10^6 on is a test on numbers it never saw. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
 
-| x | Kept numbers | Kept primes | True average share | Our model | Model error | Theory, 2.5 / (ln x − 1) | Theory error |
-|--------|-----------------:|-----------------:|-------------:|----------:|----------:|---------:|----------:|
-| 10^4 | 3,998 | 1,226 | 30.6653% | 30.5207% | −0.47% | 30.4494% | −0.70% |
-| 10^6 | 399,998 | 78,495 | 19.6238% | 19.7286% | +0.53% | 19.5076% | −0.59% |
-| 10^8 | 39,999,998 | 5,761,452 | 14.4036% | 14.5749% | +1.19% | 14.3508% | −0.37% |
-| 10^10 | 3,999,999,998 | 455,052,508 | 11.3763% | 11.5562% | +1.58% | 11.3503% | −0.23% |
-| 10^13 | 3,999,999,999,998 | 346,065,536,836 | 8.6516% | 8.8169% | +1.91% | 8.6405% | **−0.13%** |
+| x | Kept numbers | Kept primes | True average share | **Our model, 2.5 / (ln x − 1)** | **Error** | Fitted curve (check only) | Error |
+|--------|-----------------:|-----------------:|-------------:|---------:|----------:|----------:|----------:|
+| 10^4 | 3,998 | 1,226 | 30.6653% | 30.4494% | −0.70% | 30.5207% | −0.47% |
+| 10^6 | 399,998 | 78,495 | 19.6238% | 19.5076% | −0.59% | 19.7286% | +0.53% |
+| 10^8 | 39,999,998 | 5,761,452 | 14.4036% | 14.3508% | −0.37% | 14.5749% | +1.19% |
+| 10^10 | 3,999,999,998 | 455,052,508 | 11.3763% | 11.3503% | −0.23% | 11.5562% | +1.58% |
+| 10^13 | 3,999,999,999,998 | 346,065,536,836 | 8.6516% | 8.6405% | **−0.13%** | 8.8169% | +1.91% |
 
 **What it means.**
-* Both formulas track the truth closely over nine powers of ten.
-* Our model's error grows steadily (+0.5% to +1.9%) because its constants were tuned to small x.
-* The theory's error shrinks steadily (−0.7% to −0.13%) because its constants are exact in the limit.
-* **So, plainly: our model is worse than the theory beyond its training range.** At 10^4 it is the better of the two (−0.47% against −0.70%); at 10^6 they are about equal; from 10^8 on the theory is clearly better, and the gap widens with x. This is the expected result, not a failure. The point of fitting a model was to test whether the data alone would recover the law. It did recover the shape a / (ln x − b) and constants close to the true 2.5 and 1, but a fit to small numbers cannot match a formula that is exact for large ones.
+* **Our model's prediction gets better as x grows:** −0.70% at 10^4, −0.13% at 10^13. Nothing in it was tuned; the 2.5 is our filter and the (ln x − 1) is the prime number theorem.
+* **The fitted curve gets worse as x grows:** −0.47% at 10^4, +1.91% at 10^13. It was tuned to small numbers, so it is slightly better than our model only at 10^4, close to its training data, and drifts beyond.
+* **The two agree in shape.** Data alone led to a / (ln x − b) with a ≈ 2.57 and b ≈ 0.79, close to our model's 2.5 and 1. That is independent support for the formula; the formula itself does not depend on it.
 
-**Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against the local formula 2.5 / ln x):
+**Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against our model's local prediction 2.5 / ln x):
 
-| x | Local share near x | Theory, 2.5 / ln x | Error |
+| x | Local share near x | Our model, 2.5 / ln x | Error |
 |---|---:|---:|---:|
 | 10^8 | 13.5830% | 13.5717% | −0.08% |
 | 10^10 | 10.8633% | 10.8574% | −0.05% |
@@ -179,15 +188,15 @@ The local share near 10^8 (13.58%) is lower than the average share up to 10^8 (1
 
 **What was measured.** For each step from x to 10x, the **drop**: how much the average share falls, as a percentage of its old value. Also the **growth**: how many times more kept primes there are at 10x than at x.
 
-**How.** From the counts above. The **theory drop** uses the average formula at both ends: 1 − (ln x − 1) / (ln 10x − 1). Simplified, this is about ln 10 / ln x ≈ 2.3 / ln x, which is why the drop keeps shrinking. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
+**How.** From the counts above. The **predicted drop** uses our model's formula 2.5 / (ln x − 1) at both ends: 1 − (ln x − 1) / (ln 10x − 1). Simplified, this is about ln 10 / ln x ≈ 2.3 / ln x, which is why the drop keeps shrinking. Source: [`results/step3_to_10_trillion.txt`](results/step3_to_10_trillion.txt).
 
-| Step | Measured drop | Theory drop | Growth of kept primes | Measured drop ÷ theory drop |
+| Step | Measured drop | Predicted drop | Growth of kept primes | Measured ÷ predicted |
 |--------------------|---------:|-------------:|----------------------:|------------------:|
 | 10^4 to 10^5 | 21.82% | 21.90% | × 7.82 | 0.996 |
 | 10^8 to 10^9 | 11.75% | 11.67% | × 8.83 | 1.006 |
 | 10^12 to 10^13 | 7.98% | 7.96% | × 9.20 | 1.003 |
 
-**What it means.** Every ten-fold step multiplies the number of primes by a factor that rises towards 10 but never reaches it, so the share keeps falling, but more and more slowly. The measured drop agrees with the theory to within 1% at every step.
+**What it means.** Every ten-fold step multiplies the number of primes by a factor that rises towards 10 but never reaches it, so the share keeps falling, but more and more slowly. The measured drop agrees with our model's prediction to within 1% at every step.
 
 ### 3. The four endings get almost exactly equal shares
 
@@ -207,7 +216,7 @@ The local share near 10^8 (13.58%) is lower than the average share up to 10^8 (1
 This section has two separate things in it, and they must not be confused:
 
 * **The sieve itself** is an exact procedure. It is not a model and makes no prediction; it either crosses a number out or it does not. Its result has **zero error**.
-* **The product rule** is a quick estimate, from 1874-era probability reasoning, of how many numbers the sieve *will* leave. It is not our model and not the theory formula from the earlier sections. It is shown only to see where a naive estimate breaks down.
+* **The product rule** is a quick estimate, from 1874-era probability reasoning, of how many numbers the sieve *will* leave. It is not our model's prediction: it is the naive way of turning step 3 into a count, shown to see where it breaks down.
 
 **What was done.** Start from the 39,999,998 kept numbers up to x = 10^8. Cross out the multiples of 3, then of 7, 11, 13, and so on, up to 9,973, the largest prime below √10^8 = 10,000. (Why stop at √x: any composite number has a prime factor no bigger than its square root, so once every prime up to √x has been used, only primes can remain. This is proved in Lean as `sqrt_rule`.) After each prime, count what is left.
 
@@ -228,7 +237,7 @@ Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [
 **How to read it.**
 1. **The sieve is exact.** The 5,761,452 numbers left at the end are exactly the primes above 5 up to 10^8, checked one by one against an independent prime list. No prime was lost, no composite survived.
 2. **The product rule is excellent while the primes used are small, and fails at the end.** Up to 997 (a tenth of √x) it is within 0.11%. Using the last primes, from 997 up to 9,973, its error jumps to +5.68%. The reason: the coin-flip assumption only holds while the primes used are much smaller than √x. Near √x the events stop being independent (for example, a number below 10^8 cannot be divisible by two different primes that are both above 10,000). Mertens' theorem (1874) shows that, used all the way to √x, the product rule always ends up too high, by a factor that approaches 2e^−γ = 1.1229 (12.3% too high) as x grows. At 10^8 it has reached 5.68% on its way there.
-3. **The right formula for the final count is the theory, not the product rule.** The theory formula from section 1, 2.5 / (ln x − 1) × 39,999,998, gives 5,740,304 survivors, an error of −0.37%. That is the prime number theorem; the product rule is a different, cruder estimate.
+3. **The right formula for the final count is our model's prediction, not the product rule.** 2.5 / (ln x − 1) × 39,999,998 gives 5,740,304 survivors, an error of −0.37%. That is the prime number theorem; the product rule is a different, cruder estimate.
 4. The paper in [`papers/zeta-map`](papers/zeta-map/zeta-map.pdf) quotes the overshoot as 5.6%. It measures it at x = 9,973² instead of 10^8, and over all numbers instead of the 40%, so the figure differs slightly. Both are correct for their own x.
 
 ### 5. Spacing between primes ending in 1
@@ -266,11 +275,11 @@ Source: [`results/step6_sieve_the_40.txt`](results/step6_sieve_the_40.txt) and [
 * **Precision** = (primes among the candidates) ÷ (number of candidates). It answers: *if I pick a candidate, how likely is it to be prime?* It is the same quantity as the average share in section 1, just for a different wheel.
 * **Boost** = m ÷ (remainders kept). It is how many times more concentrated the primes become after filtering: the wheel keeps only 1/boost of all numbers, but keeps every prime, so the share of primes rises by the factor boost. For mod 10, 10 ÷ 4 = 2.5 (the familiar 2.5); mod 30, 30 ÷ 8 = 3.75; mod 210, 210 ÷ 48 = 4.375; mod 2310, 2,310 ÷ 480 = 4.8125.
 
-**The theory column.** Without any filter, the share of primes among all numbers up to x is about 1 / (ln x − 1) (the prime number theorem). A wheel multiplies that share by its boost, so the predicted precision is **boost ÷ (ln x − 1)**. At x = 10^8, ln x − 1 = 17.42, so mod 10 predicts 2.5 ÷ 17.42 = 14.35% and mod 30 predicts 3.75 ÷ 17.42 = 21.53%. For mod 10 this is exactly the theory formula 2.5 / (ln x − 1) from section 1. It is derived, not fitted.
+**The predicted column.** This is our model's prediction extended to bigger wheels. Without any filter, the share of primes among all numbers up to x is about 1 / (ln x − 1) (the prime number theorem). A wheel multiplies that share by its boost, so the predicted precision is **boost ÷ (ln x − 1)**. At x = 10^8, ln x − 1 = 17.42, so mod 10 predicts 2.5 ÷ 17.42 = 14.35% and mod 30 predicts 3.75 ÷ 17.42 = 21.53%. For mod 10 this is exactly the theory formula 2.5 / (ln x − 1) from section 1. It is derived, not fitted.
 
 Source: [`results/step8_precision_recall_wheels.txt`](results/step8_precision_recall_wheels.txt), at x = 10^8:
 
-| Wheel | Candidates | Primes among them | Precision (measured) | Precision (theory: boost ÷ (ln x − 1)) | Recall |
+| Wheel | Candidates | Primes among them | Precision (measured) | Precision (predicted: boost ÷ (ln x − 1)) | Recall |
 |---|---:|---:|---:|---:|---:|
 | mod 10 | 39,999,998 | 5,761,452 | 14.40% | 14.35% | 100% (0 primes missed) |
 | mod 30 | 26,666,665 | 5,761,452 | 21.61% | 21.53% | 100% (0 missed) |
@@ -282,7 +291,7 @@ Source: [`results/step8_precision_recall_wheels.txt`](results/step8_precision_re
 **What it means.**
 * **No wheel loses a prime** (recall 100%), as the Lean theorems `prime_ending` and `prime_mod30` prove for mod 10 and mod 30.
 * **Bigger wheels raise precision, with diminishing returns:** 14.4% → 21.6% → 25.2% → 27.7%. Going from mod 10 to mod 30 removes a third of the candidates; going from mod 210 to mod 2310 removes only a tenth.
-* **The theory predicts every precision to within 0.6%** (relative), with nothing fitted.
+* **The prediction matches every precision to within 0.4%** (relative), with nothing fitted.
 * **In practice, the time saved is small.** Finding every prime in the million numbers above 10^12 by running a primality test on each candidate took 1.08 s with no filter and 0.97 s (mod 10) to 0.90 s (mod 2310), a speed-up of only 1.11 to 1.19 times. A primality test already rejects a multiple of 2, 3 or 5 almost instantly, so throwing those numbers away in advance saves little. The filter matters much more for sieving, where every candidate costs memory and work.
 
 ### 7. Very large numbers
@@ -422,7 +431,7 @@ Two short papers in journal format, written for an academic reader with no names
 
 | Script | What it does | Time |
 |--------------------------------|--------------------------------------------|------|
-| `steps/step1_density.py` | Trains the density model on x up to 400,000 and tests it to 10^13 | 1 s |
+| `steps/step1_density.py` | Compares our model's prediction 2.5 / (ln x − 1) with true counts, and fits the side-experiment curve on x up to 400,000 | 1 s |
 | `steps/step2_relative_change.py` | Per power of ten: kept, removed, density drop, prime growth | 1 s |
 | `steps/step3_to_10_trillion.py` | Steps 1 and 2 to 10^13 with every count from primecount | 1 s |
 | `steps/step4_endings.py` | Primes by ending up to 10^10, segmented sieve, checked against primecount | 1 min |
@@ -446,7 +455,7 @@ Times were measured on an Apple-silicon Mac. Scripts that sieve to 10^9 need abo
 Set `rangeStart`, `rangeEnd` and `blocks` at the bottom of the file and evaluate it in a Lean editor. It prints, for the range:
 
 * how many numbers are kept and removed, and how many primes there are;
-* measured density against the model;
+* measured density against our model's prediction 2.5 / ln x;
 * smallest, largest and every gap between primes;
 * counts by ending;
 * estimates of the total number of primes up to the range's end, using the 2.5 formula and li(x);
@@ -500,7 +509,8 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 * The Lean report's results above 3.3 x 10^24 are probable primes, as stated in its output. The 1,554 primes found from 10^28 to 10^28 + 99,999 are therefore probable primes in Lean; sympy confirms the same list independently.
 * Sieve correctness is proved for the reference sieve `primesSpec` and for any window (`window_sieve`). The faster array sieve is checked against them by computation, not proved equal.
 * The 2.5 / (ln x − 1) and 2.5 / ln x formulas are measured and match the prime number theorem, but they are not proved in Lean: that needs the prime number theorem itself, which Mathlib does not yet contain.
-* Our fitted model 2.5694 / (ln x − 0.7918) is a description of the data, not a law: its error grows slowly with x (+1.9% at 10^13), and it should not be used far beyond the range it was tested on.
+* The fitted curve 2.5694 / (ln x − 0.7918) from the side experiment is a description of small-x data, not a law: its error grows slowly with x (+1.9% at 10^13). All predictions use our model's derived formula instead.
+* Our model's density prediction rests on the prime number theorem, which is proved in the mathematical literature but not yet in our Lean file (see the Lean section).
 * The Lean theorems `record_digits` and `first_exponent_100M` prove what the formula gives with a 40-digit value of log10 2; they match an independent high-precision calculation but are not a proof from first principles.
 * Density "predictions" describe how many primes there are, not which numbers are prime.
 
@@ -522,8 +532,9 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 | Kept numbers, the 40% | Numbers above 5 ending in 1, 3, 7 or 9 |
 | Average share | Kept primes ÷ kept numbers, over everything from 6 to x |
 | Local share | The same fraction in a narrow window just below x |
-| Theory formula | A prediction derived from the prime number theorem, with no fitted constants |
-| Our model | 2.5694 / (ln x − 0.7918): the same shape as the theory, with constants fitted to x ≤ 400,000 |
+| Prime number theorem | π(x) ≈ x / (ln x − 1): how many primes there are up to x; supplies the 1 / (ln x − 1) in our model's prediction |
+| Our model | The method (strip the 60%, keep endings 1, 3, 7, 9, cross out multiples of primes up to √x), with its derived density prediction 2.5 / (ln x − 1) |
+| Fitted curve | 2.5694 / (ln x − 0.7918): a side experiment fitted to x ≤ 400,000, used only to check our model's formula |
 | Relative error | (prediction − true) ÷ true |
 | Sieve | Crossing out the multiples of small primes so that only primes remain |
 | √x rule | To sieve up to x, crossing out the multiples of the primes up to √x is enough |
