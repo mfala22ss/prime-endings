@@ -6,6 +6,12 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 
 **Step-by-step account of everything done, with results:** [WALKTHROUGH.md](WALKTHROUGH.md) ([PDF](docs/Walkthrough.pdf)).
 
+**Papers (journal format):**
+* [A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof](papers/sieve-window/sieve-window.pdf) (5 pages)
+* [The decimal sieve through the Riemann zeta function and a Dirichlet L-function](papers/zeta-map/zeta-map.pdf) (4 pages)
+
+**License:** code under MIT, papers and written documentation under CC BY 4.0 (see [License and citation](#license-and-citation)). To cite this work, use [CITATION.cff](CITATION.cff).
+
 > **What this is and is not.** Every result here is already known to mathematics, most of it for over a century (see [Prior work](#prior-work)). This is not a new discovery. It is a careful rediscovery: each claim is computed from scratch, tested against ground truth, audited, and where possible formally proved.
 
 ---
@@ -21,6 +27,8 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 7. [How to run it](#how-to-run-it)
 8. [Prior work](#prior-work)
 9. [Limits](#limits)
+10. [Papers](#papers)
+11. [License and citation](#license-and-citation)
 
 ---
 
@@ -341,5 +349,5 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 ## License and citation
 
 * **Code** (Python, Lean, tools): MIT. See [LICENSE](LICENSE). Anyone may reuse it if they keep the copyright notice.
-* **Papers and write-ups** in [`papers/`](papers): Creative Commons Attribution 4.0 ([CC BY 4.0](papers/LICENSE-CC-BY-4.0.txt)). Anyone may reuse them if they give credit.
+* **Papers and written documentation** ([`papers/`](papers), [WALKTHROUGH.md](WALKTHROUGH.md), [`docs/`](docs)): Creative Commons Attribution 4.0 ([CC BY 4.0](papers/LICENSE-CC-BY-4.0.txt)). Anyone may reuse them if they give credit.
 * **Citing:** [`CITATION.cff`](CITATION.cff) gives the citation; GitHub shows it as "Cite this repository". No license can require a citation for using an idea or a mathematical result; citing those is an academic norm, which this file makes easy to follow.

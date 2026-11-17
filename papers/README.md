@@ -17,4 +17,4 @@ The formal proofs cited in the first paper are in [`../lean/Solution.lean`](../l
 
 ## License
 
-The papers and this folder are licensed under [Creative Commons Attribution 4.0 International](LICENSE-CC-BY-4.0.txt) (CC BY 4.0): anyone may reuse or adapt them, provided they give appropriate credit. The code in the rest of the repository is under the MIT license. To cite this work, use [`../CITATION.cff`](../CITATION.cff).
+The papers, this folder and the repository's written documentation are licensed under [Creative Commons Attribution 4.0 International](LICENSE-CC-BY-4.0.txt) (CC BY 4.0): anyone may reuse or adapt them, provided they give appropriate credit. The code in the rest of the repository is under the MIT license. To cite this work, use [`../CITATION.cff`](../CITATION.cff).

@@ -19,3 +19,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+Scope of the licenses in this repository
+
+1. Software (everything in python/, lean/, tools/, web/ and papers/verify_numbers.py,
+   papers/build.sh): the MIT License above.
+
+2. Papers and written documentation (the manuscripts and PDFs in papers/,
+   WALKTHROUGH.md, README.md and docs/): Creative Commons Attribution 4.0
+   International (CC BY 4.0). You may share and adapt them for any purpose,
+   provided you give appropriate credit, link to the license and indicate if
+   changes were made. Full text: papers/LICENSE-CC-BY-4.0.txt or
+   https://creativecommons.org/licenses/by/4.0/legalcode
+
+How to credit: see CITATION.cff.
+
