@@ -267,6 +267,90 @@ For each prime, the first 111 multiples in rows of 10, then a 33 x 33 grid of th
 
 In every row of 10 multiples, 4 land in the 40% (p x k ends in 1, 3, 7 or 9 exactly when k does). For 7, about one third of those are also multiples of 3, so 7 is left with the other two thirds: the 1/7 x 2/3 share seen in step 10.
 
+## Step 11. The full method, from the 60/40 split to the square-root rule, worked for 3 and 7
+
+**Question.** After throwing away 60% and keeping 40%, what exactly is needed to finish the job, and how far do the primes 3 and 7 alone get?
+
+**Built.** [`python/steps/step11_three_and_seven.py`](python/steps/step11_three_and_seven.py). Every formula below is checked against a real sieve for every x from 1 to 100,000 ([`results/step11_three_and_seven.txt`](results/step11_three_and_seven.txt)): PASS.
+
+### The method in four steps
+
+**Step A. Throw away 60%.** Remove every number ending in 0, 2, 4, 5, 6 or 8 (multiples of 2 or 5), and 1 and 3. No prime above 5 is lost (`prime_ending`, proved in Lean).
+
+**Step B. Count what is kept.** Let N(y) be how many of 1, ..., y end in 1, 3, 7 or 9:
+
+    N(y) = y − ⌊y/2⌋ − ⌊y/5⌋ + ⌊y/10⌋
+
+The kept 40% up to x (numbers above 5) is
+
+    C(x) = N(x) − 2        (the 2 removes the numbers 1 and 3)
+
+which equals the earlier formula 4⌊x/10⌋ + r − 2.
+
+**Step C. The square-root rule: which primes are needed.** To leave only primes up to x, cross out the multiples of every prime p with p x p ≤ x, that is, every prime up to √x, except 2 and 5 (already gone in step A).
+
+*Why it is enough.* If n ≤ x is not prime, write n = a x b with a ≤ b. Then a x a ≤ a x b = n ≤ x, so a ≤ √x, and the smallest prime factor of n is at most a. So some prime up to √x divides n and crosses it out (`smallest_factor_le_sqrt`, proved in Lean).
+
+*Why nothing smaller works.* The number p x p is not prime, and its only prime factor is p. Leave p out and p x p survives. So each prime p is needed from p x p on: 3 from 9, 7 from 49, 11 from 121, 13 from 169.
+
+**Step D. Cross out, starting at p x p.** Multiples of p below p x p have a smaller factor, which has already crossed them out. The prime p itself is never crossed out.
+
+### Worked for 3 and 7
+
+The multiples of a number d that end in 1, 3, 7 or 9 are d x m with m ending in 1, 3, 7 or 9 (because d does). So up to x there are N(⌊x/d⌋) of them, d itself included. By inclusion-exclusion, 3 and 7 together cross out
+
+    R(x) = N(⌊x/3⌋) + N(⌊x/7⌋) − N(⌊x/21⌋) − 2        (x ≥ 7)
+
+The − N(⌊x/21⌋) stops multiples of both (21, 63, 147, ...) from being counted twice; the − 2 takes out 3 and 7 themselves, which are primes. What is left is
+
+    L(x) = C(x) − R(x)
+
+**Worked example, x = 100.**
+
+| Quantity | Formula | Value |
+|---|---|---:|
+| Numbers ending in 1, 3, 7, 9 | N(100) = 100 − 50 − 20 + 10 | 40 |
+| Kept 40% | C(100) = 40 − 2 | 38 |
+| Multiples of 3 in it (with 3) | N(33) = 33 − 16 − 6 + 3 | 14 |
+| Multiples of 7 in it (with 7) | N(14) = 14 − 7 − 2 + 1 | 6 |
+| Multiples of 21 in it | N(4) = 4 − 2 − 0 + 0 | 2 |
+| Crossed out | R(100) = 14 + 6 − 2 − 2 | 16 |
+| **Left** | L(100) = 38 − 16 | **22** |
+
+The 22 left are exactly the primes from 7 to 97.
+
+### The rule for 3 and 7
+
+**3 and 7 alone leave exactly the primes for every x up to 120.** The first failure is 121 = 11 x 11: 11 x 11 = 121 is the first number above 7 x 7 whose smallest prime factor is above 7.
+
+| x | Kept C(x) | Crossed out R(x) | Left L(x) | Primes above 5 | Non-primes left |
+|---:|---:|---:|---:|---:|---:|
+| 100 | 38 | 16 | 22 | 22 | 0 |
+| 120 | 46 | 19 | 27 | 27 | 0 |
+| 121 | 47 | 19 | 28 | 27 | 1 (121) |
+| 169 | 66 | 27 | 39 | 36 | 3 (121, 143, 169) |
+| 1,000 | 398 | 170 | 228 | 165 | 63 |
+| 100,000 | 39,998 | 17,141 | 22,857 | 9,589 | 13,268 |
+
+The non-primes that survive 3 and 7 are 121, 143, 169, 187, 209, 221, 247, 253, 289, ...: every one is a product of primes 11 or larger.
+
+**The long-run share after 3 and 7.** Each prime p removes 1 in p of what is left, so the share of all numbers left after 2, 5, 3 and 7 tends to
+
+    (1 − 1/2)(1 − 1/5)(1 − 1/3)(1 − 1/7) = 4/10 x 2/3 x 6/7 = 8/35 = 22.857%
+
+which is exactly what the table reaches at 100,000. It is the mod-210 wheel of step 8: 48 numbers kept in every 210.
+
+### The rule for any x
+
+1. Keep the 40%: C(x) numbers.
+2. List the primes p with 3 ≤ p ≤ √x, p ≠ 5. There are P(√x) − 2 of them.
+3. For each, cross out its multiples in the 40% from p x p upwards.
+4. What is left is exactly the primes from 7 to x; add 2, 3 and 5.
+
+New primes join only at prime squares (9, 49, 121, 169, 289, 361, 529, 841, 961, ...); between two of them the list does not change. Each prime p first catches p x p, then p times the next numbers with no factor below p: 11 x 11, 11 x 13, 11 x 17, 11 x 19, ...
+
+---
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).

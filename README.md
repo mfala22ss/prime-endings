@@ -239,6 +239,7 @@ Two runs were made on Comparator Live:
 | `steps/step7_audit.py` | 13 checks of the code and results against independent ground truth | 5 s |
 | `steps/step8_precision_recall_wheels.py` | Precision, recall and timing for wheels mod 10, 30, 210, 2310 | 12 s |
 | `steps/step10_one_hundred_octillion.py` | Exact counts, filter and multiples at x = 10^29 | 1 s |
+| `steps/step11_three_and_seven.py` | The square-root rule worked for 3 and 7, with formulas checked for every x up to 100,000 | 1 s |
 | `make_prime_tables.py` | Writes `data/primes_40pct_up_to_1e6.csv` and `data/breakdown_by_ending.csv` | 1 min |
 | `extras/density_models.py` | Compares fitted models with li(x), Riemann's R(x) and up to 1,000 zeta-zero waves | 6 s |
 | `extras/legendre_endings.py` | Refits Legendre's 1808 constant from density data; models the bias between endings | 5 s |
