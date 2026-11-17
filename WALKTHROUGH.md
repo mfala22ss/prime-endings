@@ -387,6 +387,30 @@ The zeta function takes a number s and returns ζ(s) = 1 + 1/2^s + 1/3^s + ... E
 
 ---
 
+## Step 14. The window proof, and the two papers
+
+**What was asked.** Fix the errors found in the two short PDFs, rewrite them as journal papers with no names, and prove the items in "what the proofs do not establish" where possible.
+
+**Step 1: what could be proved now.** Of the four open items, only the window sieve (a > 1) can be proved with what Mathlib has today. The density formulas need the prime number theorem, which is not in Mathlib. The fast array code cannot be reasoned about until its `while` loops are rewritten. `#eval` outputs are computations, not statements.
+
+**Step 2: the window proof in Lean.** Three new theorems in [`lean/Solution.lean`](lean/Solution.lean):
+1. `mul_coprime_ten`: multiplying by a number that ends in 1, 3, 7 or 9 keeps you inside the 40% exactly when the multiplier is inside it.
+2. `multiplier_range`: the program's start and stop values, `max(p, (a + p − 1) / p)` and `b / p`, are exactly "p ≤ k and a ≤ p × k ≤ b".
+3. `window_sieve`: in any window [a, b], the numbers that end in 1, 3, 7 or 9, are above 5 and are not crossed out are exactly the primes in [max(a, 6), b].
+
+Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61d), using only Lean's three standard axioms. `Challenge.lean` and `config.json` now name 19 theorems. Status: ESTABLISHED locally; Comparator run PENDING.
+
+**Step 3: corrections carried into the papers.**
+* The counting formula (Legendre on the 40%) needs x ≥ 25. Below 25 it is right only at x = 4 (checked for every x from 2 to 3,000).
+* The Mertens product overshoots the true prime share by 5.6% at 9,973² (ratio 1.05645), not 5.7%.
+* L(1, χ) ≠ 0 gives infinitely many primes per ending and equal shares in the Dirichlet-density sense; the plain "a quarter each up to x" needs the prime number theorem for progressions.
+* The ending counts up to 10^7 are for primes above 5.
+* Unchecked figures (the "67 to 10" error, the prize amount) were removed rather than kept.
+
+**Step 4: the papers.** [`papers/`](papers) holds two papers in AMS journal format (XeLaTeX, STIX Two fonts), authored "Anonymous" for double-blind review, with a shared bibliography of 16 references, each checked against Crossref. [`papers/verify_numbers.py`](papers/verify_numbers.py) recomputes every number in both papers: 29 of 29 checks pass ([`results/papers_verify_numbers.txt`](results/papers_verify_numbers.txt)).
+
+**Step 5: license and citation.** Code stays MIT. The papers are CC BY 4.0, which requires credit on reuse. [`CITATION.cff`](CITATION.cff) adds GitHub's "Cite this repository" button.
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
@@ -429,6 +453,9 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | L5 | `three_seven_enough` | Every n with 5 < n ≤ 120 ending in 1, 3, 7 or 9 and not a multiple of 3 or 7 (other than 7) is prime |
 | L5 | `three_seven_fails_at_121` | 121 ends in 1, is not a multiple of 3 or 7, and is not prime: 120 is the limit for 3 and 7 |
 | L5 | `left37_100`, `left37_120`, `left37_121` | The step-11 counting formula gives 22, 27 and 28 left after 3 and 7 |
+| L6 | `mul_coprime_ten` | If p ends in 1, 3, 7 or 9, then p × k ends in one of them exactly when k does: multiples of p inside the 40% are p × (numbers ending in 1, 3, 7, 9) |
+| L6 | `multiplier_range` | Starting at k = max(p, ⌈a/p⌉) and stopping at ⌊b/p⌋ is exactly the same as asking p ≤ k and a ≤ p × k ≤ b |
+| L6 | `window_sieve` | The sieve on any window [a, b]: a number in the window that ends in 1, 3, 7 or 9, is above 5, and is not crossed out, is prime; and every prime in [max(a, 6), b] survives |
 
 <a id="run-log"></a>
 
@@ -444,6 +471,7 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | 6 | Built-in "There Are Infinitely Many Primes" | L4 fixed: `prime_mod30` splits into the 30 possible remainders; the fix was compiled first with a local Lean 4.35 | **Not yet run** |
 | local | (compile only) | L5 version: full `Solution.lean` and `Challenge.lean` (16 theorems) compiled against Mathlib (build files from `lake exe cache get`, Lean 4.34) | No errors; cross-check `true`; benchmark ALL 4 CHECKS PASSED |
 | 7 | Built-in "There Are Infinitely Many Primes" | L5 version | **Not yet run** |
+| local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
 
@@ -452,6 +480,7 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 ## What is still open
 
 * The fixed `prime_mod30` must be run on Comparator (run 6).
-* The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof.
+* The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof. Route: rewrite its loops without `while`, prove a loop invariant.
+* The counting formula (Legendre on the 40%) is checked by computation only; it holds for every x ≥ 25 and, below 25, only at x = 4.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.
 * Lean's reports above 3.317 x 10^24 list probable primes (Miller-Rabin bound of Sorenson and Webster, 2017).

@@ -1,0 +1,157 @@
+\documentclass[11pt]{amsart}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}[BoldFont={STIX Two Text:style=Bold}, BoldItalicFont={STIX Two Text:style=Bold Italic}]
+\setmathfont{STIX Two Math}
+\usepackage[final]{microtype}
+\usepackage{booktabs}
+\usepackage[margin=1.15in]{geometry}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{theorem}[proposition]{Theorem}
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand{\zt}{\zeta_{(10)}}
+
+\title[The decimal sieve and the zeta function]{The decimal sieve through the Riemann zeta function and a Dirichlet L-function: an expository account with numerical checks}
+
+\author{Anonymous}
+\address{Manuscript prepared for double-blind review}
+
+\subjclass[2020]{Primary 11M06, 11N05; Secondary 11N13, 11Y35}
+\keywords{Riemann zeta function, Euler product, Mertens' theorem, Dirichlet $L$-function, Chebyshev's bias, explicit formula}
+
+\date{17 November 2026}
+
+\begin{document}
+
+\begin{abstract}
+A sieve for primes that first discards the integers divisible by $2$ or $5$, keeping the $40\%$ of integers whose last decimal digit is $1$, $3$, $7$ or $9$, has a direct description in terms of the Riemann zeta function and a single Dirichlet $L$-function. We set out that description: the filter is the removal of two Euler factors; the crossing out by a sieving prime is the removal of one more; Mertens' theorem governs the product of the removed factors and explains why it overestimates the proportion of primes by a factor tending to $2e^{-\gamma}$; the quadratic character modulo $5$, lifted to modulo $10$, separates the endings $\{1,9\}$ from $\{3,7\}$, and its value $L(1,\chi)=\tfrac32\cdot 2\log\varphi/\sqrt5$ underlies the equal long-run share of the endings; and the zeros of $\zeta$ describe the fluctuations of the prime count. Each value quoted is recomputed to at least ten significant digits by an accompanying script. The note contains no new theorem. Its purpose is to make precise, and correct where necessary, a set of informal identifications that are frequently made between elementary sieving and analytic number theory.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Every prime $p>5$ is coprime to $10$, so a search for primes may begin by discarding all integers divisible by $2$ or by $5$. The integers that remain are those ending in $1,3,7$ or $9$, and they have density $(1-\tfrac12)(1-\tfrac15)=\tfrac25$. The remaining primes are then found by crossing out the multiples of $3,7,11,\dots$ up to the square root of the bound. A companion note treats this sieve, and its formal verification, in detail.
+
+The same operations have exact counterparts in the theory of $\zeta(s)$, and the purpose of this note is to state them carefully. The identifications are classical \cite{HardyWright2008,Apostol1976,Davenport1980}, but informal accounts often blur three distinctions that matter: between the Euler product at $s=1$ and the true proportion of primes (Section~\ref{sec:mertens}); between the divergence of $\zeta(s)$ at $s=1$ and the prime number theorem (Section~\ref{sec:pole}); and between the non-vanishing of $L(1,\chi)$ and the small, persistent lead of the endings $3$ and $7$ (Section~\ref{sec:endings}). We keep these apart and quantify each.
+
+\section{The filter as two Euler factors}\label{sec:euler}
+
+For $\operatorname{Re}s>1$ the Riemann zeta function has the Dirichlet series and Euler product
+\[
+\zeta(s)=\sum_{n\ge1}\frac1{n^s}=\prod_p\Big(1-\frac1{p^s}\Big)^{-1}.
+\]
+Multiplying the series by $1-2^{-s}$ subtracts $\sum_n(2n)^{-s}$ and so deletes the even terms. More generally, for any finite set $S$ of primes,
+\begin{equation}\label{eq:sieve}
+\zeta(s)\prod_{p\in S}\Big(1-\frac1{p^s}\Big)=\sum_{\substack{n\ge1\\ p\nmid n\ (p\in S)}}\frac1{n^s},
+\end{equation}
+which is the analytic form of crossing out the multiples of the primes in $S$. Taking $S=\{2,5\}$ gives the zeta function of the integers prime to $10$:
+\[
+\zt(s)=\sum_{\gcd(n,10)=1}\frac1{n^s}=\Big(1-\frac1{2^s}\Big)\Big(1-\frac1{5^s}\Big)\zeta(s).
+\]
+At $s=1$ the factor $(1-\frac12)(1-\frac15)=\frac25$ is exactly the density of the filtered set. At $s=2$ we obtain the closed form
+\[
+\zt(2)=\frac{\pi^2}{6}\cdot\frac34\cdot\frac{24}{25}=1.184352528130723\ldots,
+\]
+which agrees with the direct sum over $n\equiv1,3,7,9\pmod{10}$ to all digits computed (Section~\ref{sec:checks}).
+
+\section{Mertens' product and the proportion of primes}\label{sec:mertens}
+
+At $s=1$ the factor attached to $p$ in \eqref{eq:sieve} is $1-1/p$, the proportion of integers not divisible by $p$. Mertens' third theorem \cite{Mertens1874} states that
+\[
+\prod_{p\le y}\Big(1-\frac1p\Big)\sim\frac{e^{-\gamma}}{\log y}\qquad(y\to\infty),
+\]
+where $\gamma=0.5772156649\ldots$ is Euler's constant. For $y=9973$, the largest prime below $10^4$, the product is $0.0608846925$ and the asymptotic value is $0.0609775886$.
+
+It is tempting to read the product as the proportion of primes left by the sieve. It is not. Sieving $[1,x]$ by the primes up to $y=\sqrt x$ leaves $1$ and the primes in $(\sqrt x,x]$, whose proportion is essentially $\pi(x)/x$. For $x=9973^2=99\,460\,729$ this proportion is $0.0576316608$, so the product exceeds it by the factor $1.0564$. The discrepancy is not a finite-size effect. By Mertens' theorem with $y=\sqrt x$ and the prime number theorem,
+\[
+\frac{\prod_{p\le\sqrt x}(1-1/p)}{\pi(x)/x}\;\longrightarrow\;\frac{e^{-\gamma}/\log\sqrt x}{1/\log x}=2e^{-\gamma}=1.1229189\ldots
+\]
+The independence heuristic implicit in multiplying the factors fails because the events ``$p\nmid n$'' for $p\le\sqrt x$ are not independent on $[1,x]$ when the number of primes involved is as large as $\pi(\sqrt x)$.
+
+\section{The pole of the zeta function}\label{sec:pole}
+
+As $s\to1^{+}$ the series for $\zeta(s)$ tends to the harmonic series and diverges. If there were finitely many primes, the Euler product would have finitely many factors, each finite at $s=1$, which is a contradiction; this is Euler's proof that there are infinitely many primes. The pole does not by itself yield the density $1/\log x$. The prime number theorem, $\pi(x)\sim x/\log x$, requires in addition that $\zeta(1+it)\ne0$ for every real $t$, as shown by Hadamard and by de la Vall\'ee Poussin in 1896 (see \cite{Apostol1976,Davenport1980}).
+
+\section{The four endings}\label{sec:endings}
+
+Define $\chi$ on the integers by $\chi(n)=1$ if $n\equiv\pm1\pmod{10}$, $\chi(n)=-1$ if $n\equiv\pm3\pmod{10}$, and $\chi(n)=0$ if $\gcd(n,10)>1$. On integers prime to $10$ it coincides with the Legendre symbol $(n/5)$, because $1$ and $9\equiv4$ are the non-zero squares modulo $5$ and $3$, $7\equiv2$ are not. Thus $\chi$ is the character modulo $10$ induced by the quadratic character $\chi_5$ modulo $5$, and
+\[
+L(s,\chi)=\sum_{n\ge1}\frac{\chi(n)}{n^s}=\Big(1-\frac{\chi_5(2)}{2^s}\Big)L(s,\chi_5)=\Big(1+\frac1{2^s}\Big)L(s,\chi_5),
+\]
+since $\chi_5(2)=-1$. Dirichlet's class number formula for the real quadratic field $\mathbb{Q}(\sqrt5)$, whose class number is $1$ and whose fundamental unit is the golden ratio $\varphi=(1+\sqrt5)/2$, gives $L(1,\chi_5)=2\log\varphi/\sqrt5$ (see \cite{Davenport1980}). Hence
+\[
+L(1,\chi)=\frac32\cdot\frac{2\log\varphi}{\sqrt5}=\frac32\times0.4304089409\ldots=0.6456134114\ldots,
+\]
+in agreement with the direct sum to $25$ digits.
+
+\begin{remark}[What $L(1,\chi)\ne0$ gives]
+The non-vanishing of $L(1,\chi)$, together with the pole of $\zeta$, implies that each of the four classes $1,3,7,9\pmod{10}$ contains infinitely many primes, and that each has Dirichlet density $\tfrac14$ among the primes (Dirichlet's theorem; \cite{Davenport1980}). The stronger statement that each class contains asymptotically one quarter of the primes up to $x$, in the sense of natural density, is the prime number theorem for arithmetic progressions; it requires $L(1+it,\chi)\ne0$ for all real $t$ \cite{Davenport1980}.
+\end{remark}
+
+The equal long-run share does not mean that the four classes are level at any finite height. Table~\ref{tab:endings} gives the counts up to $10^7$.
+
+\begin{table}[ht]
+\centering
+\caption{Primes $5<p\le10^7$ in each residue class modulo $10$.}\label{tab:endings}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Last digit & 1 & 3 & 7 & 9\\
+\midrule
+Number of primes & 166\,104 & 166\,229 & 166\,211 & 166\,032\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The classes $\{3,7\}$ contain $332\,440$ primes against $332\,136$ for $\{1,9\}$, a lead of $304$, or about $0.05\%$. This is an instance of Chebyshev's bias \cite{RubinsteinSarnak1994,GranvilleMartin2006}: primes tend to lie in the non-residue classes. A principal source of the bias is that the square of every prime $p>5$ is a quadratic residue, hence $\equiv1$ or $9\pmod{10}$; the fluctuations around it are governed by the zeros of $L(s,\chi)$. The value of $L(1,\chi)$ guarantees the equal long-run share but does not measure the lead.
+
+\section{The zeros and the fluctuations of the prime count}\label{sec:zeros}
+
+The function $\zeta(s)$ continues meromorphically to $\mathbb{C}$ with its only pole at $s=1$. Its non-trivial zeros $\rho$ lie in the strip $0<\operatorname{Re}s<1$; the first three are $\tfrac12+i\gamma_k$ with
+\[
+\gamma_1=14.1347251417\ldots,\qquad\gamma_2=21.0220396388\ldots,\qquad\gamma_3=25.0108575801\ldots
+\]
+Von Mangoldt's explicit formula expresses the weighted prime count $\psi(x)=\sum_{p^k\le x}\log p$ exactly in terms of these zeros: for $x>1$ not a prime power,
+\[
+\psi(x)=x-\sum_\rho\frac{x^\rho}{\rho}-\log(2\pi)-\frac12\log\big(1-x^{-2}\big),
+\]
+the sum being taken over the zeros in order of increasing $|\operatorname{Im}\rho|$ \cite{Davenport1980}. A zero on the critical line and its conjugate contribute an oscillation of amplitude $2\sqrt x/|\rho|$ and frequency $\gamma_k$ in the variable $\log x$. Truncating the sum at more and more zeros reproduces the step function $\psi(x)$ with increasing fidelity.
+
+The Riemann hypothesis asserts that every non-trivial zero has real part $\tfrac12$. It is unproved. Assuming it, Schoenfeld \cite{Schoenfeld1976} showed that
+\[
+|\pi(x)-\operatorname{li}(x)|<\frac{\sqrt x\,\log x}{8\pi}\qquad(x\ge2657).
+\]
+
+\section{Summary of the correspondence}\label{sec:summary}
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Elementary operations of the decimal sieve and their analytic counterparts.}\label{tab:map}
+\begin{tabular}{@{}p{3.6cm}p{4.0cm}p{5.4cm}@{}}
+\toprule
+Sieve operation & Analytic object & Precise statement\\
+\midrule
+Keep the $40\%$ & $(1-2^{-s})(1-5^{-s})$ & Equals $\tfrac25$ at $s=1$; defines $\zt(s)$\\
+Cross out multiples of $p$ & Factor $1-p^{-s}$ & Identity \eqref{eq:sieve}\\
+Product of the factors & Mertens' theorem & Overestimates $\pi(x)/x$ by a factor $\to2e^{-\gamma}$\\
+Infinitely many primes & Pole of $\zeta$ at $s=1$ & Density $1/\log x$ needs $\zeta(1+it)\ne0$\\
+Equal share of endings & $L(1,\chi)\ne0$ & Natural density needs $L(1+it,\chi)\ne0$\\
+Lead of $3$ and $7$ & Chebyshev's bias & Squares of primes; zeros of $L(s,\chi)$\\
+Fluctuations of $\pi(x)$ & Zeros of $\zeta$ & Explicit formula\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Numerical checks}\label{sec:checks}
+
+All values above were recomputed with the script \texttt{verify\_numbers.py} that accompanies this note, using \texttt{mpmath} at $30$ significant digits, \texttt{sympy}, and the program \texttt{primecount} \cite{primecount} for $\pi(9973^2)$. The checks include the closed form and the direct sum for $\zt(2)$, the Mertens product and its asymptotic value at $y=9973$, the ratio $1.0564$, the identity $L(1,\chi)=\frac32L(1,\chi_5)$ against the direct sum, the counts in Table~\ref{tab:endings} from a sieve to $10^7$, and the first three zeros together with $|\zeta(\rho_k)|<10^{-25}$. All checks pass.
+
+\bibliographystyle{amsplain}
+\bibliography{../references}
+
+\end{document}

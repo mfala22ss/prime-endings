@@ -130,7 +130,7 @@ The Lean report lists primes in windows at any size. In the 100,000 numbers from
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and the latest Mathlib on [Comparator Live](https://comparator.live.lean-lang.org).
 
-**What the proofs establish** (all 24 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
+**What the proofs establish** (all 27 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
 
 **The filter**
 * Every prime above 5 ends in 1, 3, 7 or 9 (`prime_ending`).
@@ -143,6 +143,7 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and th
 * Each prime is needed from its square on: p × p is never prime, and only p divides it (`square_not_prime`, `square_needs_p`).
 * A number survives the sieve on the 40% if and only if it is a prime above 5 (`survives_iff`): no prime is lost and no composite gets through.
 * The reference sieve lists exactly the primes up to x (`mem_primesSpec`).
+* The sieve works on any window [a, b], not only from 1: start each prime p at max(p, ⌈a/p⌉), use only multipliers ending in 1, 3, 7, 9, and what survives is exactly the primes in [max(a, 6), b] (`window_sieve`, with `mul_coprime_ten` and `multiplier_range`).
 * Within the 40%, crossing out 3 and 7 alone is enough up to 120 (`three_seven_enough`) and first fails at 121 = 11 × 11 (`three_seven_fails_at_121`).
 
 **Infinitely many primes**
@@ -156,12 +157,17 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Checked with Lean v4.36 and th
 * Crossing out 3 and 7 leaves 22 numbers up to 100, 27 up to 120 and 28 up to 121, because 121 wrongly survives (`left37_100`, `left37_120`, `left37_121`).
 * With a 40-digit value of log10 2, the record prime 2^136,279,841 − 1 has 41,024,320 digits, and 332,192,807 is the first exponent giving 100 million digits (`record_digits`, `first_exponent_100M`).
 
-**What the proofs do not establish**
-* The density formulas 2.5 / (ln x − 1) and li(x).
-* The sieve on a window [a, b] with a > 1 (checked by computation only).
-* That the fast array code equals the reference sieve (compared up to 3,000 only).
-* The `#eval` outputs, which are computations, not proofs.
-* Anything new: all of these are known results.
+**What the proofs do not establish, and how each could be proved**
+
+| Not yet proved | Why not | How to prove it |
+|---|---|---|
+| The density formulas 2.5 / (ln x − 1) and li(x) | They follow from the prime number theorem, which Mathlib does not contain yet | Import the [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) project once its main theorem is complete, then derive share × ln x → 2.5. Comparator Live only has Mathlib, so this cannot be certified there |
+| That the fast array code equals the reference sieve | Its `while` loops compile as `partial` functions, which Lean's logic cannot look inside | Rewrite the loops with structural or well-founded recursion, prove a loop invariant ("entry n is true iff n survives the primes crossed so far"), then prove `primesUpTo x = primesSpec x` |
+| The `#eval` outputs | They are computations, not statements | Restate each result as a theorem; small ones close with `decide`. Big ones need `native_decide`, which adds the `Lean.ofReduceBool` axiom that the Comparator setup does not permit |
+| The counting formula (Legendre on the 40%) | Not formalised | Inclusion and exclusion over the sieving primes with Mathlib's Möbius function; it needs the condition x ≥ 25 |
+| Anything new | All of these are known results | Not applicable |
+
+The sieve on a window [a, b] with a > 1 used to be in this list; it is now proved (`window_sieve`, 17 November 2026).
 
 ### Proof 1: why every prime above 5 ends in 1, 3, 7 or 9
 
@@ -214,6 +220,10 @@ The factor 10 is what ties the proof to this project. Euclid's classical version
 The fast array sieve used for the reports (`primesUpTo`, `primesBetween`) is a separate, faster implementation. It is compared with `primesSpec` by computation (identical up to 3,000, the `#eval` line in the file), not by proof.
 
 ---
+
+## Papers
+
+Two short papers in journal format, written for an academic reader with no names, are in [`papers/`](papers): one on the window sieve and its Lean proof, and one mapping the sieve onto the zeta function. Every number in them is recomputed by [`papers/verify_numbers.py`](papers/verify_numbers.py) (29 of 29 checks pass).
 
 ## What "verified by Lean" means
 
@@ -323,11 +333,13 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 
 * Counts above 10^10 by ending were not computed: primecount counts all primes, not primes by ending, and the sieve would take about 15 hours to reach 10^13.
 * The Lean report's results above 3.3 x 10^24 are probable primes, as stated in its output. The 1,554 primes found from 10^28 to 10^28 + 99,999 are therefore probable primes in Lean; sympy confirms the same list independently.
-* Sieve correctness is proved for the reference sieve `primesSpec`. The faster array sieve is checked against it by computation, not proved equal.
+* Sieve correctness is proved for the reference sieve `primesSpec` and for any window (`window_sieve`). The faster array sieve is checked against them by computation, not proved equal.
 * The 2.5 / (ln x - 1) share is measured and matches the prime number theorem, but it is not proved in Lean: that needs the prime number theorem itself, which this file does not formalise.
 * The Lean theorems `record_digits` and `first_exponent_100M` prove what the formula gives with a 40-digit value of log10 2; they match an independent high-precision calculation but are not a proof from first principles.
 * Density "predictions" describe how many primes there are, not which numbers are prime.
 
-## License
+## License and citation
 
-MIT. See [LICENSE](LICENSE).
+* **Code** (Python, Lean, tools): MIT. See [LICENSE](LICENSE). Anyone may reuse it if they keep the copyright notice.
+* **Papers and write-ups** in [`papers/`](papers): Creative Commons Attribution 4.0 ([CC BY 4.0](papers/LICENSE-CC-BY-4.0.txt)). Anyone may reuse them if they give credit.
+* **Citing:** [`CITATION.cff`](CITATION.cff) gives the citation; GitHub shows it as "Cite this repository". No license can require a citation for using an idea or a mathematical result; citing those is an academic norm, which this file makes easy to follow.

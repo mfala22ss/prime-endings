@@ -52,3 +52,17 @@ theorem three_seven_enough (n : ℕ) (h5 : 5 < n) (hn : n ≤ 120)
 
 theorem three_seven_fails_at_121 :
     121 % 10 = 1 ∧ ¬ 3 ∣ 121 ∧ ¬ 7 ∣ 121 ∧ ¬ Nat.Prime 121 := sorry
+
+theorem mul_coprime_ten {p k : ℕ} (hp : Nat.Coprime p 10) :
+    Nat.Coprime (p * k) 10 ↔ Nat.Coprime k 10 := sorry
+
+theorem multiplier_range {a b p k : ℕ} (hp : 0 < p) :
+    (max p ((a + p - 1) / p) ≤ k ∧ k ≤ b / p) ↔ (p ≤ k ∧ a ≤ p * k ∧ p * k ≤ b) := sorry
+
+def CrossedOut (a b n : ℕ) : Prop :=
+  ∃ p k, p.Prime ∧ 3 ≤ p ∧ p ≠ 5 ∧ p * p ≤ b ∧ Nat.Coprime k 10 ∧
+    max p ((a + p - 1) / p) ≤ k ∧ k ≤ b / p ∧ p * k = n
+
+theorem window_sieve (a b n : ℕ) :
+    (a ≤ n ∧ n ≤ b ∧ 5 < n ∧ Nat.Coprime n 10 ∧ ¬ CrossedOut a b n) ↔
+      (n.Prime ∧ max a 6 ≤ n ∧ n ≤ b) := sorry

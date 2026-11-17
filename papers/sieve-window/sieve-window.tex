@@ -1,0 +1,219 @@
+\documentclass[11pt]{amsart}
+
+\usepackage{unicode-math}
+\setmainfont{STIX Two Text}[BoldFont={STIX Two Text:style=Bold}, BoldItalicFont={STIX Two Text:style=Bold Italic}]
+\setmathfont{STIX Two Math}
+\usepackage[final]{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[margin=1.15in]{geometry}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Cand}{\mathcal{C}}
+\newcommand{\Sv}{\mathcal{P}}
+\newcommand{\Mult}{\mathcal{M}}
+\newcommand{\lpf}{\operatorname{lpf}}
+\newcommand{\lean}[1]{\texttt{#1}}
+
+\title[A window sieve on the residues prime to 10]{A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof}
+
+\author{Anonymous}
+\address{Manuscript prepared for double-blind review}
+
+\subjclass[2020]{Primary 11N35, 11A41; Secondary 11Y11, 68V20}
+\keywords{sieve of Eratosthenes, wheel sieve, segmented sieve, Legendre's formula, prime counting, formal verification, Lean}
+
+\date{17 November 2026}
+
+
+\begin{document}
+
+\begin{abstract}
+Every prime larger than $5$ ends, in base ten, in one of the digits $1$, $3$, $7$ or $9$; equivalently it lies in one of the four residue classes prime to $10$, which together contain $40\%$ of the integers. We give a self-contained treatment of the sieve of Eratosthenes restricted to these classes and applied to an arbitrary window $[a,b]$. The crossing-out step is described by an explicit multiplier range, $\max(p,\lceil a/p\rceil)\le k\le\lfloor b/p\rfloor$ with $\gcd(k,10)=1$, and we prove that the survivors are exactly the primes in $[\max(a,6),b]$. We record the corresponding restriction of Legendre's counting formula and determine its exact range of validity: it holds for every $x\ge 25$, and below $25$ only at $x=4$. The window identity, the multiplier range and the closure lemma it rests on have been formalised in Lean~4 against Mathlib and are checked using only the three standard axioms of the system. The underlying mathematics is classical; the contribution is a precise formulation suitable for implementation, together with its formal verification and a reproducible set of numerical checks.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+The observation that a prime $p>5$ cannot end in $0,2,4,5,6$ or $8$ is elementary: such a $p$ would be divisible by $2$ or by $5$. Discarding these six digits leaves the integers coprime to $10$, a set of density $\varphi(10)/10=2/5$. Restricting a sieve to such a set is the idea behind \emph{wheel} sieves \cite{Pritchard1981}, and restricting it to a window $[a,b]$ far from the origin is the idea behind segmented sieves. Neither idea is new. What is easy to get wrong in practice is the bookkeeping at the boundary of the window: where to start crossing out, which multipliers to use, and which primes are needed. This note fixes that bookkeeping exactly and proves it correct, by hand and by machine.
+
+Our main statement is Theorem~\ref{thm:window}. For a window $[a,b]$ it identifies the primes in $[\max(a,6),b]$ with the integers of the window that are prime to $10$ and are not of the form $pk$, where $p$ runs over the primes $3\le p\le\sqrt b$ other than $5$ and $k$ runs over an explicit range of multipliers prime to $10$. Section~\ref{sec:count} derives the corresponding inclusion and exclusion count of Legendre type and shows that it is exact precisely for $x\ge 25$ and for $x=4$. Section~\ref{sec:examples} works two examples, one of them with $a=10^{28}$, to show where the cost of the method lies. Section~\ref{sec:formal} describes the formalisation in Lean~4 \cite{Lean4} with Mathlib \cite{Mathlib2020}, and states plainly what is and is not covered by it. Every number in the paper is recomputed by a script that accompanies it (Section~\ref{sec:reproduce}).
+
+\subsection*{Notation}
+Throughout, $a,b,k,m,n$ denote positive integers and $p,q$ denote primes. We write $\lpf(n)$ for the least prime factor of $n>1$, $\pi(x)$ for the number of primes not exceeding $x$, $\mu$ for the M\"obius function, and
+\[
+K(y)=\#\{1\le m\le y:\gcd(m,10)=1\}=4\Big\lfloor\frac{y}{10}\Big\rfloor+r(y\bmod 10),
+\]
+where $r(j)$ is the number of elements of $\{1,3,7,9\}$ not exceeding $j$.
+
+\section{The sieve on a window}\label{sec:window}
+
+\begin{definition}\label{def:sets}
+Let $1\le a\le b$.
+\begin{enumerate}
+\item The \emph{candidates} in $[a,b]$ are $\Cand(a,b)=\{n\in[a,b]:n>5,\ \gcd(n,10)=1\}$.
+\item The \emph{sieving primes} for $b$ are $\Sv(b)=\{p\ \text{prime}:3\le p,\ p\ne 5,\ p^2\le b\}$.
+\item For $p\in\Sv(b)$, the \emph{multiples crossed out by $p$} are
+\[
+\Mult_p(a,b)=\{pk:\ \gcd(k,10)=1,\ k_0(p)\le k\le k_1(p)\},
+\]
+where $k_0(p)=\max\big(p,\lceil a/p\rceil\big)$ and $k_1(p)=\lfloor b/p\rfloor$.
+\end{enumerate}
+\end{definition}
+
+Each condition in $\Mult_p(a,b)$ has one purpose: $k\ge\lceil a/p\rceil$ places $pk$ at or above $a$, $k\le\lfloor b/p\rfloor$ keeps it at or below $b$, $k\ge p$ starts the crossing out at $p^2$, and $\gcd(k,10)=1$ restricts attention to multiples that are themselves candidates. The next three lemmas justify these choices.
+
+\begin{lemma}[Closure]\label{lem:closure}
+If $\gcd(p,10)=1$ then $\gcd(pk,10)=1$ if and only if $\gcd(k,10)=1$.
+\end{lemma}
+
+\begin{proof}
+For $q\in\{2,5\}$ we have $q\mid pk$ if and only if $q\mid p$ or $q\mid k$, and $q\nmid p$.
+\end{proof}
+
+\begin{lemma}[Multiplier range]\label{lem:range}
+For $p\ge 1$, the conditions $k_0(p)\le k\le k_1(p)$ hold if and only if $p\le k$ and $a\le pk\le b$.
+\end{lemma}
+
+\begin{proof}
+$\lfloor b/p\rfloor\ge k$ is equivalent to $pk\le b$, and $\lceil a/p\rceil=\lfloor (a+p-1)/p\rfloor\le k$ is equivalent to $a+p-1\le pk+p-1$, that is, to $a\le pk$.
+\end{proof}
+
+\begin{lemma}[Square-root bound and starting point]\label{lem:sqrt}
+Let $n>1$ be composite and $q=\lpf(n)$. Then $q^2\le n$, and $n=qk$ with $k\ge q$.
+\end{lemma}
+
+\begin{proof}
+Write $n=qk$. Since $n$ is composite, $k>1$, and every prime factor of $k$ divides $n$ and so is at least $q$. Hence $k\ge q$ and $n=qk\ge q^2$.
+\end{proof}
+
+\begin{theorem}[Window identity]\label{thm:window}
+For all $1\le a\le b$,
+\[
+\{p\ \text{prime}:\ \max(a,6)\le p\le b\}\;=\;\Cand(a,b)\setminus\bigcup_{p\in\Sv(b)}\Mult_p(a,b).
+\]
+\end{theorem}
+
+\begin{proof}
+Let $n$ be a prime with $\max(a,6)\le n\le b$. Then $n>5$, so $n$ is divisible by neither $2$ nor $5$ and $n\in\Cand(a,b)$. If $n=pk$ with $p\in\Sv(b)$ and $k\ge p\ge 3$, then $p$ would be a divisor of $n$ with $1<p<n$, which is impossible. So $n$ survives.
+
+Conversely let $n\in\Cand(a,b)$ be composite and $q=\lpf(n)$. Since $\gcd(n,10)=1$ we have $q\notin\{2,5\}$, so $q\ge 3$ and $q\ne 5$. By Lemma~\ref{lem:sqrt}, $q^2\le n\le b$, so $q\in\Sv(b)$, and $n=qk$ with $k\ge q$. Lemma~\ref{lem:closure} gives $\gcd(k,10)=1$, and Lemma~\ref{lem:range}, applied with $a\le n=qk\le b$, gives $k_0(q)\le k\le k_1(q)$. Hence $n\in\Mult_q(a,b)$ and $n$ is crossed out.
+\end{proof}
+
+\begin{remark}[Implementation]\label{rem:steps}
+The theorem translates directly into a segmented sieve. For each $p\in\Sv(b)$ one division gives $k_0(p)$; it is then raised to the next integer prime to $10$. Since the admissible residues of $k$ modulo $10$ cycle through $1,3,7,9$, successive admissible multipliers differ by $2,4,2,2$ (in an order fixed by the residue of the starting value), so successive crossed-out values differ by $2p,4p,2p,2p$. No number below $a$ is ever examined. The primes $2,3,5$ that lie in $[a,b]$ are added separately.
+\end{remark}
+
+\section{Counting without listing}\label{sec:count}
+
+The window identity with $a=1$ leads to a counting formula of Legendre type in which the multiples of $2$ and $5$ have already been removed by the function $K$.
+
+\begin{corollary}\label{cor:legendre}
+Let $x\ge 25$ and let $Q=\prod_{p\in\Sv(x)}p$. Then
+\[
+\pi(x)=\pi\big(\lfloor\sqrt x\rfloor\big)-1+\sum_{d\mid Q}\mu(d)\,K\Big(\Big\lfloor\frac{x}{d}\Big\rfloor\Big).
+\]
+\end{corollary}
+
+\begin{proof}
+For $d\mid Q$ we have $\gcd(d,10)=1$, so by Lemma~\ref{lem:closure} the integers $m\le x$ prime to $10$ and divisible by $d$ are exactly the $dk$ with $k\le x/d$ and $\gcd(k,10)=1$; there are $K(\lfloor x/d\rfloor)$ of them. By inclusion and exclusion the sum therefore counts the integers $1\le m\le x$ with $\gcd(m,10Q)=1$. Such an $m>1$ has no prime factor up to $\sqrt x$ (all of those divide $10Q$ once $\sqrt x\ge 5$, which is where the hypothesis $x\ge 25$ is used), so it is a prime in $(\sqrt x,x]$; conversely every such prime is counted. The sum is thus $1+\pi(x)-\pi(\sqrt x)$.
+\end{proof}
+
+\begin{remark}[The range $x\ge 25$ is sharp]\label{rem:sharp}
+For $x<25$ the prime $5$ exceeds $\sqrt x$ but is removed by $K$, and the right-hand side undercounts. A direct computation shows that for $2\le x\le 24$ the formula is correct only at $x=4$. For example, at $x=24$ we have $\Sv(24)=\{3\}$ and the right-hand side is $\pi(4)-1+K(24)-K(8)=2-1+10-3=8$, while $\pi(24)=9$.
+\end{remark}
+
+\begin{example}
+For $x=100$, $\Sv(100)=\{3,7\}$ and $Q=21$, so
+$K(100)-K(33)-K(14)+K(4)=40-14-6+2=22$ and $\pi(100)=\pi(10)-1+22=4-1+22=25$.
+\end{example}
+
+The sum has $2^{|\Sv(x)|}$ terms, so Corollary~\ref{cor:legendre} is of practical use only for small $x$. The methods of Meissel and Lehmer \cite{Lehmer1959}, Lagarias, Miller and Odlyzko \cite{LMO1985}, and Del\'eglise and Rivat \cite{DelegliseRivat1996} reorganise the same inclusion and exclusion so that the cost becomes sublinear in $x$.
+
+\section{Two worked windows}\label{sec:examples}
+
+\subsection{The window $[1000,1100]$}
+Here $\Cand(1000,1100)$ has $40$ elements and $\Sv(1100)$ consists of the nine primes $3,\allowbreak 7,\allowbreak 11,\allowbreak 13,\allowbreak 17,\allowbreak 19,\allowbreak 23,\allowbreak 29,\allowbreak 31$, since $\sqrt{1100}\approx 33.2$. Table~\ref{tab:window} lists, for each sieving prime, the multipliers' bounds, the multiples crossed out, the number of candidates removed for the first time, and the number of candidates still alive.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{The sieve on $[1000,1100]$. The column ``new'' counts candidates crossed out for the first time; ``left'' counts candidates still alive.}\label{tab:window}
+\begin{tabular}{@{}r r r >{\raggedright\arraybackslash}p{6.6cm} r r@{}}
+\toprule
+$p$ & $\lceil a/p\rceil$ & $k_1$ & elements of $\Mult_p(1000,1100)$ & new & left\\
+\midrule
+3  & 334 & 366 & 1011, 1017, 1023, 1029, 1041, 1047, 1053, 1059, 1071, 1077, 1083, 1089 & 12 & 28\\
+7  & 143 & 157 & 1001, 1029, 1043, 1057, 1071, 1099 & 4 & 24\\
+11 & 91  & 100 & 1001, 1023, 1067, 1089 & 1 & 23\\
+13 & 77  & 84  & 1001, 1027, 1053, 1079 & 2 & 21\\
+17 & 59  & 64  & 1003, 1037, 1071 & 2 & 19\\
+19 & 53  & 57  & 1007, 1083 & 1 & 18\\
+23 & 44  & 47  & 1081 & 1 & 17\\
+29 & 35  & 37  & 1073 & 1 & 16\\
+31 & 33  & 35  & 1023 & 0 & 16\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sixteen survivors $1009$, $1013$, $1019$, $1021$, $1031$, $1033$, $1039$, $1049$, $1051$, $1061$, $1063$, $1069$, $1087$, $1091$, $1093$, $1097$ are precisely the primes in the window, as Theorem~\ref{thm:window} requires.
+
+\subsection{A window starting at $10^{28}$}
+For $a=10^{28}$ and $p=7$, a single division gives
+\[
+\Big\lceil\frac{10^{28}}{7}\Big\rceil=1\,428\,571\,428\,571\,428\,571\,428\,571\,429,
+\]
+which is prime to $10$, so the first element of $\Mult_7$ is $7\cdot 1\,428\,571\,428\,571\,428\,571\,428\,571\,429=10^{28}+3$. Locating the multiples of a given prime is therefore cheap at any height. The cost of the method lies elsewhere: an exact sieve of a window near $10^{28}$ requires every prime up to $10^{14}$, and there are $\pi(10^{14})=3\,204\,941\,750\,802$ of them. In the accompanying program, windows with $\sqrt b>2\cdot 10^6$ are therefore pre-sieved by the primes up to $2\cdot 10^6$ only, and the survivors are tested by the Miller-Rabin test on fixed prime bases, which is deterministic below the bound $\psi_{13}$ of Sorenson and Webster \cite{SorensonWebster2017}.
+
+\section{Formal verification}\label{sec:formal}
+
+The statements of Section~\ref{sec:window} have been formalised in Lean~4 \cite{Lean4} using Mathlib \cite{Mathlib2020}. The file compiles without errors under Lean v4.34.0-rc1 with the Mathlib revision of 17 August 2026 (commit \texttt{818f61d}), and the command \lean{\#print axioms} reports that the three window results depend only on \lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}, the standard axioms of Lean's logic. Table~\ref{tab:lean} matches the results of this paper to their Lean names.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Results of the paper and their formal counterparts.}\label{tab:lean}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+Result & Lean name & Status\\
+\midrule
+Primes $p>5$ are prime to $10$ & \lean{prime\_ending} & proved\\
+Lemma~\ref{lem:closure} & \lean{mul\_coprime\_ten} & proved\\
+Lemma~\ref{lem:range} & \lean{multiplier\_range} & proved\\
+Lemma~\ref{lem:sqrt} & \lean{smallest\_factor\_le\_sqrt}, \lean{sqrt\_rule} & proved\\
+Theorem~\ref{thm:window} & \lean{window\_sieve} & proved\\
+Theorem~\ref{thm:window} with $a=1$, as a list & \lean{survives\_iff}, \lean{mem\_primesSpec} & proved\\
+Each sieving prime is needed from $p^2$ on & \lean{square\_not\_prime}, \lean{square\_needs\_p} & proved\\
+Corollary~\ref{cor:legendre} & none & computation only\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the formal statement of Theorem~\ref{thm:window} the set difference is expressed pointwise: an integer $n$ satisfies $a\le n\le b$, $n>5$, $\gcd(n,10)=1$ and is not of the form $pk$ with $p\in\Sv(b)$, $\gcd(k,10)=1$ and $k_0(p)\le k\le k_1(p)$, if and only if $n$ is prime and $\max(a,6)\le n\le b$. The multiplier bounds appear in the formal statement in exactly the integer form used by the program, $\max(p,\lfloor(a+p-1)/p\rfloor)\le k\le\lfloor b/p\rfloor$.
+
+Three things are \emph{not} established by the formalisation, and we state them explicitly.
+\begin{enumerate}
+\item \emph{The executable sieve.} The program that performs the crossing out uses mutable arrays and \lean{while} loops. Such loops are compiled as partial functions in Lean and cannot be reasoned about inside the logic, so the agreement of the program with the specification above has been tested (its output agrees with the specification for every $x\le 3000$, and its window reports agree with independent computations) but not proved. Proving it requires rewriting the loops by well-founded recursion and establishing a loop invariant; we regard this as routine but have not done it.
+\item \emph{Corollary~\ref{cor:legendre}.} The counting formula is checked numerically (Section~\ref{sec:reproduce}) but not formalised.
+\item \emph{Density statements.} Approximations such as $\pi(x)\approx x/(\log x-1)$, and the resulting share $\approx 2.5/(\log x-1)$ of primes among the candidates up to $x$, are consequences of the prime number theorem with an error term. The prime number theorem is not yet part of Mathlib; it is the subject of an ongoing formalisation project \cite{PNTplus}.
+\end{enumerate}
+
+\section{Reproducibility}\label{sec:reproduce}
+
+The script \texttt{verify\_numbers.py} that accompanies this paper recomputes every number stated above. It checks Theorem~\ref{thm:window} on $500$ random windows with $a\le 10^6$ and width up to $2000$; Corollary~\ref{cor:legendre} for every $25\le x\le 3000$, together with the list of $x\in[2,24]$ at which it holds; the full content of Table~\ref{tab:window}; the example at $10^{28}$; and $\pi(10^{14})$, which it obtains from the program \texttt{primecount} \cite{primecount}. All checks pass.
+
+\bibliographystyle{amsplain}
+\bibliography{../references}
+
+\end{document}

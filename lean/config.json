@@ -17,7 +17,10 @@
         "square_not_prime",
         "square_needs_p",
         "three_seven_enough",
-        "three_seven_fails_at_121"
+        "three_seven_fails_at_121",
+        "mul_coprime_ten",
+        "multiplier_range",
+        "window_sieve"
     ],
     "permitted_axioms": [
         "propext",
