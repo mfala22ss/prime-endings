@@ -252,6 +252,17 @@ A full sieve would need every prime up to the square root of 10^29 (316,227,766,
 
 ---
 
+## Tables: the multiples of 3
+
+**Built.** [`python/tables/multiples_of_3.py`](python/tables/multiples_of_3.py), producing [`docs/tables/Multiples_of_3.pdf`](docs/tables/Multiples_of_3.pdf) and [`data/multiples_of_3_33x33.csv`](data/multiples_of_3_33x33.csv).
+
+* Page 1: the 111 multiples of 3 up to 333, in rows of 10. 44 of them end in 1, 3, 7 or 9.
+* Page 2: a 33 x 33 grid, the first 1,089 multiples of 3 (3 to 3,267). 435 of them end in 1, 3, 7 or 9.
+
+Highlighted cells are the multiples of 3 that fall inside the 40%. They are exactly the non-primes that the prime 3 crosses out in the sieve (from 9 = 3 x 3 onwards). In every block of 10 consecutive multiples, 4 are highlighted: 3 x k ends in 1, 3, 7 or 9 exactly when k does.
+
+---
+
 ## The Lean proofs, in the order they were built
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
