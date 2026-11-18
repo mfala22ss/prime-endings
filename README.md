@@ -34,48 +34,54 @@ This project is mine; the work was done with the help of an AI assistant, **Clau
 
 ## What is proved, at a glance
 
-**30 theorems, all checked by Lean on Comparator Live in run 10 (18 November 2026).** Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
+**38 theorems.** The first 30 were checked by Lean on Comparator Live in run 10 (18 November 2026); the 8 newest (marked *new*) compile with no errors and only the standard axioms locally, and are waiting for their Comparator run. Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
 
 **[The filter (the 40%)](#the-idea-in-one-table)**
-* Every prime above 5 ends in 1, 3, 7 or 9 ([`prime_ending`](lean/Solution.lean#L34); explained in [Proof 1](#proof-1-why-every-prime-above-5-ends-in-1-3-7-or-9)).
-* No number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime ([`removed_not_prime`](lean/Solution.lean#L69)).
-* The stricter mod-30 filter also loses no prime ([`prime_mod30`](lean/Solution.lean#L45); see [bigger filters](#6-bigger-filters-precision-and-recall)).
+* Every prime above 5 ends in 1, 3, 7 or 9 ([`prime_ending`](lean/Solution.lean#L37); explained in [Proof 1](#proof-1-why-every-prime-above-5-ends-in-1-3-7-or-9)).
+* No number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime ([`removed_not_prime`](lean/Solution.lean#L72)).
+* The stricter mod-30 filter also loses no prime ([`prime_mod30`](lean/Solution.lean#L48); see [bigger filters](#6-bigger-filters-precision-and-recall)).
 
 **[The sieve](#4-sieving-the-40-leaves-exactly-the-primes)**
-* Every composite number has a prime factor whose square is at most the number ([`smallest_factor_le_sqrt`](lean/Solution.lean#L76)).
-* Crossing out the multiples of the primes up to √x leaves only primes ([`sqrt_rule`](lean/Solution.lean#L169)).
-* Every prime p has to be used from p × p onwards, or p × p would survive ([`square_not_prime`](lean/Solution.lean#L176), [`square_needs_p`](lean/Solution.lean#L185)).
-* A number survives the sieve on the 40% exactly when it is a prime above 5 ([`survives_iff`](lean/Solution.lean#L120); explained in [Proof 3](#proof-3-the-sieve-keeps-exactly-the-primes)).
-* The reference sieve lists exactly the primes up to x ([`mem_primesSpec`](lean/Solution.lean#L143)).
+* Every composite number has a prime factor whose square is at most the number ([`smallest_factor_le_sqrt`](lean/Solution.lean#L79)).
+* Crossing out the multiples of the primes up to √x leaves only primes ([`sqrt_rule`](lean/Solution.lean#L258)).
+* Every prime p has to be used from p × p onwards, or p × p would survive ([`square_not_prime`](lean/Solution.lean#L265), [`square_needs_p`](lean/Solution.lean#L274)).
+* A number survives the sieve on the 40% exactly when it is a prime above 5 ([`survives_iff`](lean/Solution.lean#L123); explained in [Proof 3](#proof-3-the-sieve-keeps-exactly-the-primes)).
+* The reference sieve lists exactly the primes up to x ([`mem_primesSpec`](lean/Solution.lean#L146)).
 
 **[The sieve on any range [a, b]](papers/sieve-window/sieve-window.pdf)**
-* If p ends in 1, 3, 7 or 9, then p × k is in the 40% exactly when k is ([`mul_coprime_ten`](lean/Solution.lean#L227)).
-* The start and stop multipliers, max(p, ⌈a/p⌉) and ⌊b/p⌋, give exactly the multiples of p from p × p onwards that fall in [a, b] ([`multiplier_range`](lean/Solution.lean#L233)).
-* In any range, what survives is exactly the primes in it, with none lost and no non-prime left ([`window_sieve`](lean/Solution.lean#L250); tested on a 42,000-digit window in [WALKTHROUGH step 16](WALKTHROUGH.md)).
+* If p ends in 1, 3, 7 or 9, then p × k is in the 40% exactly when k is ([`mul_coprime_ten`](lean/Solution.lean#L316)).
+* The start and stop multipliers, max(p, ⌈a/p⌉) and ⌊b/p⌋, give exactly the multiples of p from p × p onwards that fall in [a, b] ([`multiplier_range`](lean/Solution.lean#L322)).
+* In any range, what survives is exactly the primes in it, with none lost and no non-prime left ([`window_sieve`](lean/Solution.lean#L339); tested on a 42,000-digit window in [WALKTHROUGH step 16](WALKTHROUGH.md)).
+
+**The method counts the primes exactly** *(new)*
+* For every x ≥ 5, the numbers that survive the method, plus 2, 3 and 5, are exactly as many as the primes up to x ([`survivor_count`](lean/Solution.lean#L172)). This proves for every x what the run to 10^10 checked at three points.
+* Lean's own checker runs the method and gets π(100) = 25, π(1,000) = 168 and π(10,000) = 1,229 ([`prime_count_100`](lean/Solution.lean#L235), [`prime_count_1000`](lean/Solution.lean#L241), [`prime_count_10000`](lean/Solution.lean#L248)), using a faster form of the same rule that is proved equivalent ([`survivesBelow_iff`](lean/Solution.lean#L212), [`filter_survivesBelow`](lean/Solution.lean#L226)).
+* The kept 40% has 398 numbers up to 1,000 and 3,998 up to 10,000 ([`candidateCount_1000`](lean/Solution.lean#L462), [`candidateCount_10000`](lean/Solution.lean#L464)).
 
 **How far the primes we know can reach**
-* The primes up to Y decide every number below (Y + 1)²: a number there that none of them divides is prime ([`known_primes_reach`](lean/Solution.lean#L299)).
-* The primes up to Y determine all the primes up to Y × Y. Each prime p is found at p but first needed at p × p, so the sieve, run upwards from 1, always finds every prime before it needs it ([`bootstrap`](lean/Solution.lean#L313)).
-* But no fixed list of primes is enough forever: whatever list you stop at, the square of the next prime gets through ([`known_primes_not_enough`](lean/Solution.lean#L335)).
+* The primes up to Y decide every number below (Y + 1)²: a number there that none of them divides is prime ([`known_primes_reach`](lean/Solution.lean#L388)).
+* The primes up to Y determine all the primes up to Y × Y. Each prime p is found at p but first needed at p × p, so the sieve, run upwards from 1, always finds every prime before it needs it ([`bootstrap`](lean/Solution.lean#L402)).
+* But no fixed list of primes is enough forever: whatever list you stop at, the square of the next prime gets through ([`known_primes_not_enough`](lean/Solution.lean#L424)).
 
 **[Using only 3 and 7](WALKTHROUGH.md)**
-* They are enough to leave only primes up to 120 ([`three_seven_enough`](lean/Solution.lean#L194)).
-* They first fail at 121 = 11 × 11 ([`three_seven_fails_at_121`](lean/Solution.lean#L210)).
-* The counting formula gives 22, 27 and 28 left at 100, 120 and 121 ([`left37_100`](lean/Solution.lean#L220), [`left37_120`](lean/Solution.lean#L221), [`left37_121`](lean/Solution.lean#L222)).
+* They are enough to leave only primes up to 120 ([`three_seven_enough`](lean/Solution.lean#L283)).
+* They first fail at 121 = 11 × 11 ([`three_seven_fails_at_121`](lean/Solution.lean#L299)).
+* The counting formula gives 22, 27 and 28 left at 100, 120 and 121 ([`left37_100`](lean/Solution.lean#L309), [`left37_120`](lean/Solution.lean#L310), [`left37_121`](lean/Solution.lean#L311)).
 
 **[Infinitely many primes](#proof-2-infinitely-many-primes-through-the-40)**
-* For any n there is a prime above n that ends in 1, 3, 7 or 9 ([`candidate_prime_above`](lean/Solution.lean#L82)).
-* There are infinitely many primes: the site's own challenge ([`InfinitudeOfPrimes`](lean/Solution.lean#L346)).
-* Each ending, 1, 3, 7 and 9, has infinitely many primes ([`infinitely_many_ending`](lean/Solution.lean#L100), using Mathlib's Dirichlet theorem; see [the four endings](#3-the-four-endings-get-almost-exactly-equal-shares)).
+* For any n there is a prime above n that ends in 1, 3, 7 or 9 ([`candidate_prime_above`](lean/Solution.lean#L85)).
+* There are infinitely many primes: the site's own challenge ([`InfinitudeOfPrimes`](lean/Solution.lean#L435)).
+* Each ending, 1, 3, 7 and 9, has infinitely many primes ([`infinitely_many_ending`](lean/Solution.lean#L103), using Mathlib's Dirichlet theorem; see [the four endings](#3-the-four-endings-get-almost-exactly-equal-shares)).
 
 **Checked numbers**
-* 1 ÷ 0.4 = 2.5 ([`density_factor`](lean/Solution.lean#L354)).
-* 97 is prime and 91 is not ([`prime_97`](lean/Solution.lean#L356), [`not_prime_91`](lean/Solution.lean#L358)).
-* There are 38 kept numbers up to 100 and 3,999,999,998 up to 10^10 ([`candidateCount_100`](lean/Solution.lean#L369), [`candidateCount_1e10`](lean/Solution.lean#L371)).
-* The record prime 2^136,279,841 − 1 has 41,024,320 digits, and 332,192,807 is the first exponent giving 100 million digits ([`record_digits`](lean/Solution.lean#L583), [`first_exponent_100M`](lean/Solution.lean#L585)). These two rest on a 40-digit value of log10 2, not on a proof from first principles.
+* 1 ÷ 0.4 = 2.5 ([`density_factor`](lean/Solution.lean#L443)).
+* 97 is prime and 91 is not ([`prime_97`](lean/Solution.lean#L445), [`not_prime_91`](lean/Solution.lean#L447)).
+* There are 38 kept numbers up to 100 and 3,999,999,998 up to 10^10 ([`candidateCount_100`](lean/Solution.lean#L458), [`candidateCount_1e10`](lean/Solution.lean#L460)).
+* The record prime 2^136,279,841 − 1 has 41,024,320 digits, and 332,192,807 is the first exponent giving 100 million digits ([`record_digits`](lean/Solution.lean#L676), [`first_exponent_100M`](lean/Solution.lean#L678)). These two rest on a 40-digit value of log10 2, not on a proof from first principles.
 
 **[Still not proved in Lean](#the-lean-proofs)**
 * The density formula 2.5 / (ln x − 1): it needs the prime number theorem, which Mathlib does not have yet. It is tested instead, and is within 0.4% up to 10^10 ([results, section 1](#1-the-share-of-primes-in-the-40-falls-exactly-as-our-model-predicts)).
+* The specific counts at 10^8, 10^9 and 10^10: that the method's count equals π(x) is proved for every x, but Lean's checker cannot count that far itself within Comparator's rules (it would need the `native_decide` shortcut, whose extra axiom Comparator does not allow). Those three values come from running the method in Python and from primecount.
 * That the fast array code in the Lean file gives the same list as the proved reference sieve: they are compared by computation, not proof.
 * The counting formula over the 40% (Legendre's method): checked by computation for every x up to 3,000, not proved ([paper 1](papers/sieve-window/sieve-window.pdf)).
 
@@ -249,7 +255,7 @@ All figures below are copied from [`results`](results), produced by the scripts 
 | 10^9 | 399,999,998 | 50,847,534 | 50,847,534 | yes | 12.7119% | 12.6754% | −0.29% |
 | 10^10 | 3,999,999,998 | 455,052,511 | 455,052,511 | yes | 11.3763% | 11.3503% | −0.23% |
 
-So both halves of our model are tested on the same run: the method finds exactly the right number of primes, and the derived prediction matches their share to within 0.4%.
+Lean proves the first half for every x (`survivor_count`: survivors + 3 = π(x)), and its checker computes the counts itself up to 10,000 (`prime_count_10000`). So both halves of our model are tested on the same run: the method finds exactly the right number of primes, and the derived prediction matches their share to within 0.4%.
 
 **Local share, for comparison** (same file; the last million numbers below x, or fewer for small x, against our model's local prediction 2.5 / ln x):
 
@@ -422,7 +428,7 @@ What it proved: everything in run 9, plus how far the primes we know can reach:
 
 Earlier runs (1 to 7), including the first pass of the same challenge on 15 November 2026, are listed in the [run log](WALKTHROUGH.md#run-log).
 
-**What the proofs establish** (all 30 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
+**What the proofs establish** (all 38 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
 
 **The filter**
 * Every prime above 5 ends in 1, 3, 7 or 9 (`prime_ending`).

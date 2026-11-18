@@ -457,6 +457,19 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 **What it means for huge numbers.** Nothing in the logic breaks at any size. What breaks is the work: to sieve a window of 42,000-digit numbers completely, the sieve must first have found every prime up to a 21,000-digit number, and there are far too many to list. That is why huge windows are pre-sieved with the small primes and the survivors are tested one by one (step 16).
 
+## Step 18. Putting the tested counts into Lean
+
+**What was asked.** Include in the Lean file whatever had only been tested, so that Lean checks it.
+
+**What was added** (38 theorems in total, all compiling locally with only the standard axioms; Comparator run pending):
+1. **`survivor_count`:** for every x ≥ 5, survivors + 3 = π(x), where π is Mathlib's own prime-counting function. The run to 10^10 had checked this at three points; Lean now proves it for every x.
+2. **Exact values computed by Lean's own checker:** π(100) = 25, π(1,000) = 168, π(10,000) = 1,229. The checker counts the survivors itself (22, 165 and 1,226) using `SurvivesBelow`, the same rule with divisors tested only below a bound, proved equivalent to the original rule (`survivesBelow_iff`). The count to 10,000 takes about 1.5 minutes.
+3. **Kept-number counts:** 398 up to 1,000 and 3,998 up to 10,000.
+
+**What cannot be added, and why.**
+* **The counts at 10^8, 10^9, 10^10:** Lean's checker would have to count that far itself, which is far too slow; the shortcut `native_decide` adds an axiom Comparator does not allow. The rule "count = π(x)" is proved for all x; the three values themselves remain computed (Python run of the method, and primecount).
+* **The density 2.5 / (ln x − 1):** needs the prime number theorem, not yet in Mathlib.
+
 ## Interactive multiples grid
 
 **Built.** `web/multiples-grid.html`, a single file that works offline, from the module `web/multiples-grid.snippet.html` (both kept in the private companion repository since 18 November 2026). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
@@ -479,7 +492,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 is ESTABLISHED on Comparator Live too (run 10, all 30 theorems).
+Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 is ESTABLISHED on Comparator Live too (run 10, all 30 theorems). Stage L8 compiles with no errors locally (ESTABLISHED locally); its Comparator run is PENDING.
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -505,6 +518,9 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | L7 | `known_primes_reach` | If every prime up to Y is known, any number below (Y + 1)² that none of them divides is prime |
 | L7 | `bootstrap` | The primes up to Y determine all primes up to Y × Y: each prime is found before it is needed |
 | L7 | `known_primes_not_enough` | No fixed, finite list of primes crosses out every non-prime: the square of the next prime always gets through |
+| L8 | `survivor_count` | For every x ≥ 5, the survivors of the method plus 2, 3, 5 number exactly π(x) |
+| L8 | `prime_count_100`, `prime_count_1000`, `prime_count_10000` | Lean's kernel runs the method: π(100) = 25, π(1,000) = 168, π(10,000) = 1,229 |
+| L8 | `survivesBelow_iff`, `filter_survivesBelow`, `candidateCount_1000`, `candidateCount_10000` | The faster equivalent survival rule used for those counts; 398 and 3,998 kept numbers |
 
 <a id="run-log"></a>
 
@@ -523,6 +539,7 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
 | 9 | Built-in "There Are Infinitely Many Primes" | Updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean): all 27 theorems, including `mul_coprime_ten`, `multiplier_range` and `window_sieve` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled |
 | 10 | Built-in "There Are Infinitely Many Primes" | [`lean/runs/run10_SolutionProofsOnly_30_theorems.lean`](lean/runs/run10_SolutionProofsOnly_30_theorems.lean) (SHA-256 050ccaf2...): all 30 theorems, adding `known_primes_reach`, `bootstrap`, `known_primes_not_enough` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib) |
+| local | (compile only) | L8 version: adds the exact-count theorems; 38 theorems, `Challenge.lean` and `config.json` list 26 | No errors; only the standard axioms. Comparator run **PENDING** (the kernel count to 10,000 takes about 1.5 minutes) |
 | local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Then passed on Comparator as run 10 |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 

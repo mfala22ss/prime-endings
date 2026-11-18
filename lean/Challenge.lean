@@ -39,6 +39,15 @@ def primesSpec (x : ℕ) : List ℕ :=
 
 theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x := sorry
 
+theorem survivor_count (x : ℕ) (hx : 5 ≤ x) :
+    ((Finset.range (x + 1)).filter Survives).card + 3 = Nat.primeCounting x := sorry
+
+theorem prime_count_100 : Nat.primeCounting 100 = 25 := sorry
+
+theorem prime_count_1000 : Nat.primeCounting 1000 = 168 := sorry
+
+theorem prime_count_10000 : Nat.primeCounting 10000 = 1229 := sorry
+
 theorem sqrt_rule (x n : ℕ) (hn : 1 < n) (hx : n ≤ x)
     (h : ∀ p, p.Prime → p * p ≤ x → ¬ p ∣ n) : n.Prime := sorry
 

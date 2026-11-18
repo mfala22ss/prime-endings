@@ -11,6 +11,9 @@ Main results:
   `√x` suffices.
 * `survives_iff`, `mem_primesSpec`: the sieve rule on the 40% keeps exactly the primes above 5,
   and the reference sieve `primesSpec x` lists exactly the primes up to `x`.
+* `survivor_count`: for every `x ≥ 5`, the survivors of the sieve on the 40% plus 2, 3, 5 number
+  exactly `π(x)`; `prime_count_100`, `prime_count_1000`, `prime_count_10000`: Lean's kernel runs the
+  method and obtains `π(100) = 25`, `π(1000) = 168`, `π(10000) = 1229`.
 * `infinitely_many_ending`: infinitely many primes end in each of 1, 3, 7 and 9 (Dirichlet).
 * `sqrt_rule`, `square_not_prime`, `square_needs_p`: sieving by the primes up to `√x` is enough,
   and each prime is needed from its square on.
@@ -160,6 +163,92 @@ theorem mem_primesSpec {x n : ℕ} : n ∈ primesSpec x ↔ n.Prime ∧ n ≤ x 
       · exact Or.inr (Or.inl rfl)
       · exact absurd hp (by norm_num)
       · exact Or.inr (Or.inr (Or.inl rfl))
+
+/-! ## The method counts the primes exactly -/
+
+/-- **The method gives exactly `π(x)`, for every `x ≥ 5`.** The numbers that survive the sieve on
+    the 40% up to `x`, plus the three primes 2, 3 and 5 set aside, are exactly as many as the
+    primes up to `x`. This proves for every `x` what the run to `10^10` checked at three points. -/
+theorem survivor_count (x : ℕ) (hx : 5 ≤ x) :
+    ((Finset.range (x + 1)).filter Survives).card + 3 = Nat.primeCounting x := by
+  have hsplit : (Finset.range (x + 1)).filter Nat.Prime =
+      (Finset.range (x + 1)).filter Survives ∪ {2, 3, 5} := by
+    ext n
+    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_union, Finset.mem_insert,
+      Finset.mem_singleton, survives_iff]
+    constructor
+    · rintro ⟨hn, hp⟩
+      by_cases h5 : 5 < n
+      · exact Or.inl ⟨hn, hp, h5⟩
+      · right
+        interval_cases n <;> simp_all <;> norm_num at hp
+    · rintro (⟨hn, hp, -⟩ | rfl | rfl | rfl)
+      · exact ⟨hn, hp⟩
+      all_goals exact ⟨by omega, by norm_num⟩
+  have hdisj : Disjoint ((Finset.range (x + 1)).filter Survives) {2, 3, 5} := by
+    rw [Finset.disjoint_left]
+    intro n hn h
+    simp only [Finset.mem_filter, survives_iff] at hn
+    simp only [Finset.mem_insert, Finset.mem_singleton] at h
+    omega
+  rw [Nat.primeCounting, Nat.primeCounting', Nat.count_eq_card_filter_range, hsplit,
+    Finset.card_union_of_disjoint hdisj]
+  rfl
+
+/-! ## Exact prime counts, computed by Lean's kernel through the method
+
+`survivor_count` turns a count of survivors into a value of `π(x)`. Lean's kernel performs the
+counts below itself, using `SurvivesBelow`, the same survival rule with divisors tested only below
+a bound `B` (equivalent to `Survives` for `n < B * B`, by `survivesBelow_iff`). -/
+
+/-- The survival rule with divisors tested only below `B`. -/
+def SurvivesBelow (B n : ℕ) : Prop :=
+  5 < n ∧ (n % 10 = 1 ∨ n % 10 = 3 ∨ n % 10 = 7 ∨ n % 10 = 9) ∧
+    ∀ p < B, p * p ≤ n → p ∣ n → ¬ p.Prime
+
+instance (B n : ℕ) : Decidable (SurvivesBelow B n) := by unfold SurvivesBelow; infer_instance
+
+/-- For `n < B * B`, testing divisors below `B` is the same as testing all divisors. -/
+theorem survivesBelow_iff {B n : ℕ} (hn : n < B * B) : SurvivesBelow B n ↔ Survives n := by
+  unfold SurvivesBelow Survives
+  constructor
+  · rintro ⟨h5, hend, h⟩
+    refine ⟨h5, hend, fun p _ hpp hdvd => h p ?_ hpp hdvd⟩
+    by_contra hB
+    have : B ≤ p := by omega
+    nlinarith
+  · rintro ⟨h5, hend, h⟩
+    refine ⟨h5, hend, fun p _ hpp hdvd => h p ?_ hpp hdvd⟩
+    by_contra hp
+    have : n + 1 ≤ p := by omega
+    nlinarith
+
+theorem filter_survivesBelow {B x : ℕ} (hx : x < B * B) :
+    (Finset.range (x + 1)).filter (SurvivesBelow B) = (Finset.range (x + 1)).filter Survives := by
+  ext n
+  simp only [Finset.mem_filter, Finset.mem_range]
+  constructor
+  · rintro ⟨hn, h⟩; exact ⟨hn, (survivesBelow_iff (by omega)).1 h⟩
+  · rintro ⟨hn, h⟩; exact ⟨hn, (survivesBelow_iff (by omega)).2 h⟩
+
+/-- The method leaves 22 survivors up to 100, so `π(100) = 25`. -/
+theorem prime_count_100 : Nat.primeCounting 100 = 25 := by
+  rw [← survivor_count 100 (by norm_num), ← filter_survivesBelow (B := 11) (by norm_num)]
+  decide
+
+set_option maxRecDepth 100000 in
+/-- The method leaves 165 survivors up to 1,000, so `π(1000) = 168`. -/
+theorem prime_count_1000 : Nat.primeCounting 1000 = 168 := by
+  rw [← survivor_count 1000 (by norm_num), ← filter_survivesBelow (B := 32) (by norm_num)]
+  decide
+
+set_option maxRecDepth 1000000 in
+set_option maxHeartbeats 0 in
+/-- The method leaves 1,226 survivors up to 10,000, so `π(10000) = 1229`. -/
+theorem prime_count_10000 : Nat.primeCounting 10000 = 1229 := by
+  rw [← survivor_count 10000 (by norm_num), ← filter_survivesBelow (B := 101) (by norm_num)]
+  decide
+
 
 /-! ## Step 11: the square-root rule, and the sieve with 3 and 7 -/
 
@@ -369,6 +458,10 @@ def candidateCount (y : ℕ) : ℕ :=
 theorem candidateCount_100 : candidateCount 100 = 38 := by decide
 
 theorem candidateCount_1e10 : candidateCount (10 ^ 10) = 3999999998 := by decide
+
+theorem candidateCount_1000 : candidateCount 1000 = 398 := by decide
+
+theorem candidateCount_10000 : candidateCount 10000 = 3998 := by decide
 
 /-! ## Sieve -/
 
