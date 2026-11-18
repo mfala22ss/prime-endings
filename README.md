@@ -611,6 +611,7 @@ For the Lean file, paste [`lean/Solution.lean`](lean/Solution.lean) into [live.l
 
 * **Code** (Python, Lean, tools): MIT. See [LICENSE](LICENSE). Anyone may reuse it if they keep the copyright notice.
 * **Papers and written documentation** ([`papers/`](papers), [WALKTHROUGH.md](WALKTHROUGH.md), [`docs/`](docs)): Creative Commons Attribution 4.0 ([CC BY 4.0](papers/LICENSE-CC-BY-4.0.txt)). Anyone may reuse them if they give credit.
+* **Contributing:** by request only. Anyone can read, copy and fork the repository, but changes are merged only through a pull request that the owner reviews and approves. See [CONTRIBUTING.md](CONTRIBUTING.md).
 * **Citing:** [`CITATION.cff`](CITATION.cff) gives the citation; GitHub shows it as "Cite this repository". No license can require a citation for using an idea or a mathematical result; citing those is an academic norm, which this file makes easy to follow.
 
 ---
