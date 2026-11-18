@@ -421,7 +421,7 @@ Two short papers in journal format, written for an academic reader with no names
 
 **What has been checked so far.** Every Comparator run is listed, with its outcome, in the [run log](WALKTHROUGH.md#run-log). In short:
 
-* **The built-in challenge "There Are Infinitely Many Primes"** has passed with this file. The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
+* **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 24 theorems up to step 11 ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean)). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
 
   ![Comparator Live: InfinitudeOfPrimes verified](docs/img/comparator-infinitude-success.png)
 

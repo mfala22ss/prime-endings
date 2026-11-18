@@ -464,7 +464,7 @@ Status: ESTABLISHED by this run for steps 1 to 3; step 4 is the known limit of s
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of the run log below). Stages L4 and L5 compile with no errors against a local Mathlib (ESTABLISHED locally); their Comparator runs (6 and 7) are PENDING.
+Status: stages L1 to L5 are ESTABLISHED on Comparator Live (runs 1, 2, 4 and 8 of the run log below; run 8 on 18 November 2026 covered everything up to step 11). Stage L6, the three window theorems, compiles with no errors against a local Mathlib (ESTABLISHED locally); its Comparator run is PENDING.
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -499,9 +499,10 @@ Status: stages L1 to L3 are ESTABLISHED (kernel-checked in runs 1, 2 and 4 of th
 | 3 | Built-in "There Are Infinitely Many Primes" | L3 version, first try | Failed: a documentation comment placed before an `#eval` line (not a proof error) |
 | 4 | Built-in "There Are Infinitely Many Primes" | L3 version, fixed (SHA-256 57b52a1d...) | Passed; the `#eval` cross-check printed `true` |
 | 5 | Built-in "There Are Infinitely Many Primes" | L4 version, adds `prime_mod30` and `wheelBenchmark` | Failed: the last step of `prime_mod30` (`omega` cannot combine "not divisible by 2, 3, 5" into the 8 remainders mod 30; Lean's `omega` is incomplete for this). The benchmark ran in the same run: ALL 4 CHECKS PASSED, every count equal to the Python values |
-| 6 | Built-in "There Are Infinitely Many Primes" | L4 fixed: `prime_mod30` splits into the 30 possible remainders; the fix was compiled first with a local Lean 4.35 | **Not yet run** |
+| 6 | Built-in "There Are Infinitely Many Primes" | L4 fixed: `prime_mod30` splits into the 30 possible remainders; the fix was compiled first with a local Lean 4.35 | Covered by run 8 |
 | local | (compile only) | L5 version: full `Solution.lean` and `Challenge.lean` (16 theorems) compiled against Mathlib (build files from `lake exe cache get`, Lean 4.34) | No errors; cross-check `true`; benchmark ALL 4 CHECKS PASSED |
-| 7 | Built-in "There Are Infinitely Many Primes" | L5 version | **Not yet run** |
+| 7 | Built-in "There Are Infinitely Many Primes" | L5 version | Covered by run 8 |
+| 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
@@ -510,7 +511,7 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 
 ## What is still open
 
-* The fixed `prime_mod30` must be run on Comparator (run 6).
+* The window theorems (L6) must be run on Comparator: paste the full `lean/Solution.lean`.
 * The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof. Route: rewrite its loops without `while`, prove a loop invariant.
 * The counting formula (Legendre on the 40%) is checked by computation only; it holds for every x ≥ 25 and, below 25, only at x = 4.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.
