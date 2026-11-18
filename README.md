@@ -34,7 +34,7 @@ This project is mine; the work was done with the help of an AI assistant, **Clau
 
 ## What is proved, at a glance
 
-**38 theorems.** The first 30 were checked by Lean on Comparator Live in run 10 (18 November 2026); the 8 newest (marked *new*) compile with no errors and only the standard axioms locally, and are waiting for their Comparator run. Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
+**38 theorems.** The first 30 were checked by Lean on Comparator Live in run 10 (18 November 2026); the 8 newest (marked *new*) compile with no errors and only the standard axioms locally, and are waiting for their Comparator run. Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs); the site's challenge, the results and the printed axioms for every theorem are in [lean/site-challenge](lean/site-challenge/README.md).
 
 **[The filter (the 40%)](#the-idea-in-one-table)**
 * Every prime above 5 ends in 1, 3, 7 or 9 ([`prime_ending`](lean/Solution.lean#L37); explained in [Proof 1](#proof-1-why-every-prime-above-5-ends-in-1-3-7-or-9)).
@@ -390,6 +390,8 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors agains
 ### Certified on Comparator Live: the latest runs
 
 All three runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib.
+
+The site's challenge, every result, and the axioms printed for all 38 theorems are collected in one place: [**lean/site-challenge/**](lean/site-challenge/README.md).
 
 **What a pass proves, precisely.**
 * **Certified by name: only `InfinitudeOfPrimes`.** Comparator checks that it proves exactly the site's statement, using only Lean's standard axioms.
