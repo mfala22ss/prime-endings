@@ -314,6 +314,36 @@ The Lean report can list primes in a window at any size. In the 100,000 numbers 
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36, run 9, 18 November 2026). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
 
+### Certified on Comparator Live: the two latest runs
+
+Both runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib. The certificate names `InfinitudeOfPrimes`, the site's statement. To check that one theorem, Comparator must first compile the whole solution file, so a pass also means that every other proof in the file was checked by Lean: a single wrong step anywhere would have stopped the build.
+
+**Run 8, 18 November 2026: 24 theorems**
+
+![Comparator Live, run 8: Success](docs/img/comparator-run8-24-theorems.png)
+
+Code: [`lean/runs/run8_SolutionProofsOnly_24_theorems.lean`](lean/runs/run8_SolutionProofsOnly_24_theorems.lean) (SHA-256 starts 886b839d)
+
+What it proved:
+* **The filter:** every prime above 5 ends in 1, 3, 7 or 9 (`prime_ending`); no number above 5 ending in 0, 2, 4, 5, 6 or 8 is prime (`removed_not_prime`); the mod-30 filter loses no prime either (`prime_mod30`).
+* **The sieve from 1 to x:** a composite number has a prime factor whose square is at most the number (`smallest_factor_le_sqrt`); crossing out the multiples of the primes up to √x leaves only primes (`sqrt_rule`); every prime is needed from its square on (`square_not_prime`, `square_needs_p`); a number survives the sieve on the 40% exactly when it is a prime above 5 (`survives_iff`); the reference sieve lists exactly the primes up to x (`mem_primesSpec`).
+* **3 and 7 alone:** enough up to 120 (`three_seven_enough`), first fail at 121 = 11 × 11 (`three_seven_fails_at_121`), and the counting formula gives 22, 27, 28 at 100, 120, 121 (`left37_100`, `left37_120`, `left37_121`).
+* **Infinitely many primes:** a prime above any n that ends in 1, 3, 7 or 9 (`candidate_prime_above`); infinitely many primes, the site's challenge (`InfinitudeOfPrimes`); infinitely many primes for each ending (`infinitely_many_ending`).
+* **Checked numbers:** `density_factor`, `prime_97`, `not_prime_91`, `candidateCount_100`, `candidateCount_1e10`, `record_digits`, `first_exponent_100M`.
+
+**Run 9, 18 November 2026: all 27 theorems**
+
+![Comparator Live, run 9: Success](docs/img/comparator-run9-27-theorems.png)
+
+Code: [`lean/runs/run9_SolutionProofsOnly_27_theorems.lean`](lean/runs/run9_SolutionProofsOnly_27_theorems.lean) (SHA-256 starts a0e444f0; the same file as [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean))
+
+What it proved: everything in run 8, plus the sieve on **any range [a, b]**, not only from 1:
+* If p ends in 1, 3, 7 or 9, then p × k is in the 40% exactly when k is (`mul_coprime_ten`).
+* Starting each prime p at k = max(p, ⌈a/p⌉) and stopping at ⌊b/p⌋ gives exactly its multiples from p × p on that lie in [a, b] (`multiplier_range`).
+* In any range, the numbers that end in 1, 3, 7 or 9, are above 5 and are not crossed out are exactly the primes in it: none lost, no non-prime left (`window_sieve`).
+
+Earlier runs (1 to 7), including the first pass of the same challenge on 15 November 2026, are listed in the [run log](WALKTHROUGH.md#run-log).
+
 **What the proofs establish** (all 27 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
 
 **The filter**
@@ -423,7 +453,7 @@ Two short papers in journal format, written for an academic reader with no names
 
 * **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 27 theorems, including the window theorems ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean), run 9). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
 
-  ![Comparator Live: InfinitudeOfPrimes verified](docs/img/comparator-infinitude-success.png)
+  Screenshots of the two latest runs, with their code and what each proved, are in [Certified on Comparator Live](#certified-on-comparator-live-the-two-latest-runs).
 
 * **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 19 theorems. It passed on Comparator for the first 6 (run 1). All 19 are also covered by run 9, in which the whole file compiled on Comparator; they use only Lean's three standard axioms.
 
