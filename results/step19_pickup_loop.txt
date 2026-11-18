@@ -1,0 +1,11 @@
+pick up   3: remove from 9, new removals   39  first [9, 21, 27, 33, 39, 51]
+pick up   7: remove from 49, new removals   10  first [49, 77, 91, 119, 133, 161]
+pick up  11: remove from 121, new removals    5  first [121, 143, 187, 209, 253]
+pick up  13: remove from 169, new removals    4  first [169, 221, 247, 299]
+pick up  17: remove from 289, new removals    1  first [289]
+stop: next pick-up 19, and 19^2 = 361 > 300
+62 primes up to 300; last ten: [241, 251, 257, 263, 269, 271, 277, 281, 283, 293]
+
+CHECK against sympy's list of primes:
+  every x from 10 to 5,000: PASS
+  x = 1,000,000: PASS

@@ -46,8 +46,6 @@ theorem prime_count_100 : Nat.primeCounting 100 = 25 := sorry
 
 theorem prime_count_1000 : Nat.primeCounting 1000 = 168 := sorry
 
-theorem prime_count_10000 : Nat.primeCounting 10000 = 1229 := sorry
-
 theorem sqrt_rule (x n : ℕ) (hn : 1 < n) (hx : n ≤ x)
     (h : ∀ p, p.Prime → p * p ≤ x → ¬ p ∣ n) : n.Prime := sorry
 
@@ -84,3 +82,18 @@ theorem known_primes_not_enough (Y : ℕ) :
 
 theorem bootstrap (Y n : ℕ) (hn : n ≤ Y * Y) :
     n.Prime ↔ (1 < n ∧ ∀ p, p.Prime → p ≤ Y → p ∣ n → p = n) := sorry
+
+def Alive (P n : ℕ) : Prop :=
+  5 < n ∧ Nat.Coprime n 10 ∧
+    ∀ q k, q.Prime → 3 ≤ q → q ≠ 5 → q ≤ P → Nat.Coprime k 10 → q ≤ k → q * k ≠ n
+
+
+theorem prime_alive (P n : ℕ) (hp : n.Prime) (h5 : 5 < n) : Alive P n := sorry
+
+theorem next_pickup_prime (P n : ℕ) (hP : 3 ≤ P) (hPn : P < n) (ha : Alive P n)
+    (hmin : ∀ m, P < m → m < n → ¬ Alive P m) :
+    n.Prime ∧ ∀ q, q.Prime → P < q → q < n → q = 5 := sorry
+
+theorem stop_rule (P p x m : ℕ) (hP : 3 ≤ P) (hPp : P < p)
+    (hmin : ∀ m, P < m → m < p → ¬ Alive P m) (hx : x < p * p) (hm : m ≤ x)
+    (ha : Alive P m) : m.Prime := sorry

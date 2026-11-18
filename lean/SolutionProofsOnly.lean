@@ -12,8 +12,8 @@ Main results:
 * `survives_iff`, `mem_primesSpec`: the sieve rule on the 40% keeps exactly the primes above 5,
   and the reference sieve `primesSpec x` lists exactly the primes up to `x`.
 * `survivor_count`: for every `x ≥ 5`, the survivors of the sieve on the 40% plus 2, 3, 5 number
-  exactly `π(x)`; `prime_count_100`, `prime_count_1000`, `prime_count_10000`: Lean's kernel runs the
-  method and obtains `π(100) = 25`, `π(1000) = 168`, `π(10000) = 1229`.
+  exactly `π(x)`; `prime_count_100`, `prime_count_1000`: Lean's kernel runs the method and obtains
+  `π(100) = 25` and `π(1000) = 168`.
 * `infinitely_many_ending`: infinitely many primes end in each of 1, 3, 7 and 9 (Dirichlet).
 * `sqrt_rule`, `square_not_prime`, `square_needs_p`: sieving by the primes up to `√x` is enough,
   and each prime is needed from its square on.
@@ -24,6 +24,9 @@ Main results:
 * `known_primes_reach`, `bootstrap`, `known_primes_not_enough`: the primes up to `Y` decide every
   number up to `Y²`, so the sieve finds each prime before it needs it; but no fixed, finite list
   of primes is enough forever.
+* `prime_alive`, `next_pickup_prime`, `stop_rule`: the sieve as a pick-up loop. The smallest number
+  still standing above the last prime picked up is always the next prime (only 5 is skipped), no
+  prime is ever removed, and once `p * p > x` everything still standing up to `x` is prime.
 
 Computation: `report a b g` lists the primes in `[a, b]` together with summary statistics.
 Windows with `√b ≤ 2·10⁶` are sieved exactly. Larger windows are pre-sieved by all primes up to
@@ -242,13 +245,6 @@ theorem prime_count_1000 : Nat.primeCounting 1000 = 168 := by
   rw [← survivor_count 1000 (by norm_num), ← filter_survivesBelow (B := 32) (by norm_num)]
   decide
 
-set_option maxRecDepth 1000000 in
-set_option maxHeartbeats 0 in
-/-- The method leaves 1,226 survivors up to 10,000, so `π(10000) = 1229`. -/
-theorem prime_count_10000 : Nat.primeCounting 10000 = 1229 := by
-  rw [← survivor_count 10000 (by norm_num), ← filter_survivesBelow (B := 101) (by norm_num)]
-  decide
-
 
 /-! ## Step 11: the square-root rule, and the sieve with 3 and 7 -/
 
@@ -427,6 +423,97 @@ theorem known_primes_not_enough (Y : ℕ) :
   refine ⟨q * q, by nlinarith [hq.one_lt], square_not_prime q hq, fun p hp hpY hdvd => ?_⟩
   have := square_needs_p q p hq hp hdvd
   omega
+
+/-! ## The pick-up loop
+
+The sieve as a loop: start with the kept numbers (above 5, ending in 1, 3, 7, 9); pick up a prime
+`p`, remove `p * p` and then `p * k` for every larger `k` ending in 1, 3, 7, 9; the next prime to
+pick up is the smallest number still standing above `p`; stop when `p * p > x`. -/
+
+/-- `n` is still standing after every prime `q` with `3 ≤ q ≤ P`, `q ≠ 5`, has been picked up:
+    `n` is above 5, ends in 1, 3, 7 or 9, and is not `q * k` for any picked `q` and any multiplier
+    `k ≥ q` ending in 1, 3, 7 or 9. -/
+def Alive (P n : ℕ) : Prop :=
+  5 < n ∧ Nat.Coprime n 10 ∧
+    ∀ q k, q.Prime → 3 ≤ q → q ≠ 5 → q ≤ P → Nat.Coprime k 10 → q ≤ k → q * k ≠ n
+
+/-- A prime above 5 is never removed. -/
+theorem prime_alive (P n : ℕ) (hp : n.Prime) (h5 : 5 < n) : Alive P n := by
+  refine ⟨h5, ?_, ?_⟩
+  · exact (Nat.Prime.coprime_iff_not_dvd hp).2 fun h => by
+      rcases (Nat.Prime.dvd_mul hp).mp (show n ∣ 2 * 5 from h) with h' | h' <;>
+        · have := Nat.le_of_dvd (by norm_num) h'; omega
+  · intro q k hq hq3 _ _ _ hqk hn
+    rcases hp.eq_one_or_self_of_dvd q (Dvd.intro k hn) with h | h
+    · omega
+    · subst h
+      have hk : k = 1 := by
+        have := hq.pos
+        nlinarith [Nat.eq_of_mul_eq_mul_left this (hn.trans (mul_one q).symm)]
+      omega
+
+/-- The smallest prime factor of a number ending in 1, 3, 7 or 9 is neither 2 nor 5. -/
+theorem minFac_ne_two_five {n : ℕ} (hc : Nat.Coprime n 10) :
+    n.minFac ≠ 2 ∧ n.minFac ≠ 5 := by
+  have hd : n.minFac ∣ n := Nat.minFac_dvd n
+  have hcop : Nat.Coprime n.minFac 10 := Nat.Coprime.coprime_dvd_left hd hc
+  constructor <;> intro h <;> rw [h] at hcop <;> norm_num at hcop
+
+/-- A non-prime number ending in 1, 3, 7 or 9 whose smallest prime factor has been picked up is
+    removed. -/
+theorem composite_removed (P n : ℕ) (h5 : 5 < n) (hc : Nat.Coprime n 10) (hnp : ¬ n.Prime)
+    (hle : n.minFac ≤ P) : ¬ Alive P n := by
+  rintro ⟨-, -, h⟩
+  have hq : n.minFac.Prime := Nat.minFac_prime (by omega)
+  obtain ⟨h2, h5'⟩ := minFac_ne_two_five hc
+  obtain ⟨k, hk⟩ : n.minFac ∣ n := Nat.minFac_dvd n
+  have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+  have hkq : n.minFac ≤ k := by
+    have hmul : n.minFac * n.minFac ≤ n.minFac * k := by rw [← hk]; nlinarith [hsq]
+    exact Nat.le_of_mul_le_mul_left hmul hq.pos
+  have hkc : Nat.Coprime k 10 :=
+    Nat.Coprime.coprime_dvd_left (Dvd.intro_left _ hk.symm) hc
+  exact h n.minFac k hq (by have := hq.two_le; omega) h5' hle hkc hkq hk.symm
+
+/-- **The pick-up rule is right.** After the primes up to `P` have been picked up, the smallest
+    number still standing above `P` is prime, and the only prime it skips over is 5. So the loop
+    picks up exactly the primes 3, 7, 11, 13, 17, ... in order. -/
+theorem next_pickup_prime (P n : ℕ) (hP : 3 ≤ P) (hPn : P < n) (ha : Alive P n)
+    (hmin : ∀ m, P < m → m < n → ¬ Alive P m) :
+    n.Prime ∧ ∀ q, q.Prime → P < q → q < n → q = 5 := by
+  obtain ⟨h5, hc, hrest⟩ := ha
+  refine ⟨?_, fun q hq hPq hqn => ?_⟩
+  · by_contra hnp
+    by_cases hle : n.minFac ≤ P
+    · exact composite_removed P n h5 hc hnp hle ⟨h5, hc, hrest⟩
+    · push Not at hle
+      have hr : n.minFac.Prime := Nat.minFac_prime (by omega)
+      obtain ⟨-, h5'⟩ := minFac_ne_two_five hc
+      have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+      have h4 : n.minFac ≠ 4 := fun h => by rw [h] at hr; norm_num at hr
+      have hrn : n.minFac < n := by have := hr.two_le; nlinarith
+      exact hmin _ hle hrn (prime_alive P _ hr (by omega))
+  · by_contra hq5
+    have h4 : q ≠ 4 := fun h => by rw [h] at hq; norm_num at hq
+    exact hmin q hPq hqn (prime_alive P q hq (by omega))
+
+/-- **The stop rule is right.** If `p` is the next number to pick up and `p * p > x`, everything
+    still standing up to `x` is prime. Together with `prime_alive`, the survivors are exactly the
+    primes above 5 up to `x`. -/
+theorem stop_rule (P p x m : ℕ) (hP : 3 ≤ P) (hPp : P < p)
+    (hmin : ∀ m, P < m → m < p → ¬ Alive P m) (hx : x < p * p) (hm : m ≤ x)
+    (ha : Alive P m) : m.Prime := by
+  obtain ⟨h5, hc, hrest⟩ := ha
+  by_contra hnp
+  by_cases hle : m.minFac ≤ P
+  · exact composite_removed P m h5 hc hnp hle ⟨h5, hc, hrest⟩
+  · push Not at hle
+    have hr : m.minFac.Prime := Nat.minFac_prime (by omega)
+    obtain ⟨-, h5'⟩ := minFac_ne_two_five hc
+    have hsq : m.minFac ^ 2 ≤ m := Nat.minFac_sq_le_self (by omega) hnp
+    have h4 : m.minFac ≠ 4 := fun h => by rw [h] at hr; norm_num at hr
+    have hrp : m.minFac < p := by nlinarith
+    exact hmin _ hle hrp (prime_alive P _ hr (by omega))
 
 /-- Challenge definition (Comparator Live, "There Are Infinitely Many Primes"). -/
 def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n
@@ -777,3 +864,7 @@ def blocks     : ℕ := 10
 -- #eval report rangeStart rangeEnd blocks   (switched off in the proofs-only version)
 -- #eval mersenneReport 136279841   (switched off in the proofs-only version)
 -- #eval wheelBenchmark   (switched off in the proofs-only version)
+
+-- `prime_count_10000` (π(10000) = 1229, counted by Lean's kernel) is in `Solution.lean` but left
+-- out of this proofs-only version: the count needs about 10 GB of memory, more than Comparator Live
+-- allows (its build was stopped with exit code 137).

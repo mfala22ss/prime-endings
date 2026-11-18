@@ -22,7 +22,7 @@ Because the statement is the site's, not ours, nobody has to trust that we wrote
 | 8 | 18 Nov 2026 | [`run8_SolutionProofsOnly_24_theorems.lean`](../runs/run8_SolutionProofsOnly_24_theorems.lean) | 24 | **Success** ([screenshot](../../docs/img/comparator-run8-24-theorems.png)) |
 | 9 | 18 Nov 2026 | [`run9_SolutionProofsOnly_27_theorems.lean`](../runs/run9_SolutionProofsOnly_27_theorems.lean) | 27 | **Success** ([screenshot](../../docs/img/comparator-run9-27-theorems.png)) |
 | 10 | 18 Nov 2026 | [`run10_SolutionProofsOnly_30_theorems.lean`](../runs/run10_SolutionProofsOnly_30_theorems.lean) | 30 | **Success** (screenshot not saved as a file) |
-| next | pending | [`SolutionProofsOnly.lean`](../SolutionProofsOnly.lean) | 38 | not yet run |
+| 11 | 18 Nov 2026 | [`run11_SolutionProofsOnly_42_theorems.lean`](../runs/run11_SolutionProofsOnly_42_theorems.lean) (same as [`SolutionProofsOnly.lean`](../SolutionProofsOnly.lean)) | 42 | **Success** ([screenshot](../../docs/img/comparator-run11-42-theorems.png)) |
 
 Earlier runs (1 to 7, 15 to 17 November 2026) are in the [WALKTHROUGH run log](../../WALKTHROUGH.md#run-log).
 
@@ -52,7 +52,6 @@ axiom declarations: 0
 'filter_survivesBelow' depends on axioms: [propext, Classical.choice, Quot.sound]
 'prime_count_100' depends on axioms: [propext, Classical.choice, Quot.sound]
 'prime_count_1000' depends on axioms: [propext, Classical.choice, Quot.sound]
-'prime_count_10000' depends on axioms: [propext, Classical.choice, Quot.sound]
 'sqrt_rule' depends on axioms: [propext, Classical.choice, Quot.sound]
 'square_not_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
 'square_needs_p' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -67,6 +66,11 @@ axiom declarations: 0
 'known_primes_reach' depends on axioms: [propext, Classical.choice, Quot.sound]
 'bootstrap' depends on axioms: [propext, Classical.choice, Quot.sound]
 'known_primes_not_enough' depends on axioms: [propext, Classical.choice, Quot.sound]
+'prime_alive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'minFac_ne_two_five' depends on axioms: [propext, Classical.choice, Quot.sound]
+'composite_removed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'next_pickup_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'stop_rule' depends on axioms: [propext, Classical.choice, Quot.sound]
 'InfinitudeOfPrimes' depends on axioms: [propext, Classical.choice, Quot.sound]
 'density_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
 'prime_97' depends on axioms: [propext, Classical.choice, Quot.sound]

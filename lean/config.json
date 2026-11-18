@@ -16,7 +16,6 @@
         "survivor_count",
         "prime_count_100",
         "prime_count_1000",
-        "prime_count_10000",
         "sqrt_rule",
         "square_not_prime",
         "square_needs_p",
@@ -27,7 +26,10 @@
         "window_sieve",
         "known_primes_reach",
         "bootstrap",
-        "known_primes_not_enough"
+        "known_primes_not_enough",
+        "prime_alive",
+        "next_pickup_prime",
+        "stop_rule"
     ],
     "permitted_axioms": [
         "propext",

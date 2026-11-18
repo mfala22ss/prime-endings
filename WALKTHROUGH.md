@@ -470,6 +470,24 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 * **The counts at 10^8, 10^9, 10^10:** Lean's checker would have to count that far itself, which is far too slow; the shortcut `native_decide` adds an axiom Comparator does not allow. The rule "count = π(x)" is proved for all x; the three values themselves remain computed (Python run of the method, and primecount).
 * **The density 2.5 / (ln x − 1):** needs the prime number theorem, not yet in Mathlib.
 
+## Step 19. The sieve as a pick-up loop
+
+**What was asked.** Write the method as the loop a person runs by hand, and prove each of its rules in Lean.
+
+**The loop** ([`python/steps/step19_pickup_loop.py`](python/steps/step19_pickup_loop.py)):
+1. Start with the kept numbers (above 5, ending in 1, 3, 7, 9).
+2. Pick up a prime p; remove p × p, then p × k for every larger k ending in 1, 3, 7 or 9.
+3. The next prime to pick up is the smallest number still standing above p.
+4. Stop when p × p > x; what is left, plus 2, 3 and 5, is exactly the primes up to x.
+
+**Result** ([`results/step19_pickup_loop.txt`](results/step19_pickup_loop.txt)): at x = 300 it picks up 3, 7, 11, 13, 17 and stops at 19 (19 × 19 = 361 > 300), leaving the 62 primes up to 300. It gives exactly the right primes for every x from 10 to 5,000 and at x = 1,000,000.
+
+**Proved in Lean** ([`lean/Solution.lean`](lean/Solution.lean)): `prime_alive` (no prime is removed), `next_pickup_prime` (the smallest survivor above the last pick-up is the next prime; only 5 is skipped), `stop_rule` (once p × p > x every survivor up to x is prime).
+
+**Checked on Comparator Live:** run 11, 18 November 2026, 42 theorems, passed. The first attempt failed with exit code 137 because `prime_count_10000` needs about 10 GB of memory; it was removed from the proofs-only file and kept in `Solution.lean`.
+
+**What it means.** The algorithm is the classic sieve of Eratosthenes on the 40% (a wheel sieve). What is added is a machine-checked proof that each rule of the loop is right.
+
 ## Interactive multiples grid
 
 **Built.** `web/multiples-grid.html`, a single file that works offline, from the module `web/multiples-grid.snippet.html` (both kept in the private companion repository since 18 November 2026). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
@@ -492,7 +510,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 is ESTABLISHED on Comparator Live too (run 10, all 30 theorems). Stage L8 compiles with no errors locally (ESTABLISHED locally); its Comparator run is PENDING.
+Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 is ESTABLISHED on Comparator Live too (run 10, all 30 theorems). Stages L8 and L9 are ESTABLISHED on Comparator Live too (run 11, 42 theorems), except `prime_count_10000`, which is too large for Comparator and is checked locally only.
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -521,6 +539,7 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | L8 | `survivor_count` | For every x ≥ 5, the survivors of the method plus 2, 3, 5 number exactly π(x) |
 | L8 | `prime_count_100`, `prime_count_1000`, `prime_count_10000` | Lean's kernel runs the method: π(100) = 25, π(1,000) = 168, π(10,000) = 1,229 |
 | L8 | `survivesBelow_iff`, `filter_survivesBelow`, `candidateCount_1000`, `candidateCount_10000` | The faster equivalent survival rule used for those counts; 398 and 3,998 kept numbers |
+| L9 | `Alive`, `prime_alive`, `next_pickup_prime`, `stop_rule` | The sieve as a pick-up loop: no prime is removed; the smallest survivor above the last pick-up is the next prime (only 5 skipped); once p × p > x every survivor up to x is prime |
 
 <a id="run-log"></a>
 
@@ -539,7 +558,8 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
 | 9 | Built-in "There Are Infinitely Many Primes" | Updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean): all 27 theorems, including `mul_coprime_ten`, `multiplier_range` and `window_sieve` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled |
 | 10 | Built-in "There Are Infinitely Many Primes" | [`lean/runs/run10_SolutionProofsOnly_30_theorems.lean`](lean/runs/run10_SolutionProofsOnly_30_theorems.lean) (SHA-256 050ccaf2...): all 30 theorems, adding `known_primes_reach`, `bootstrap`, `known_primes_not_enough` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib) |
-| local | (compile only) | L8 version: adds the exact-count theorems; 38 theorems, `Challenge.lean` and `config.json` list 26 | No errors; only the standard axioms. Comparator run **PENDING** (the kernel count to 10,000 takes about 1.5 minutes) |
+| 11 | Built-in "There Are Infinitely Many Primes" | [`lean/runs/run11_SolutionProofsOnly_42_theorems.lean`](lean/runs/run11_SolutionProofsOnly_42_theorems.lean): 42 theorems, adding the exact count and the pick-up loop | **Passed**, 18 November 2026. A first attempt that also contained `prime_count_10000` was stopped with exit code 137 (out of memory, about 10 GB needed); that theorem is kept in `Solution.lean` only |
+| local | (compile only) | L8 version: adds the exact-count theorems; 38 theorems, `Challenge.lean` and `config.json` list 26 | No errors; only the standard axioms. Passed on Comparator as run 11, without `prime_count_10000` |
 | local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Then passed on Comparator as run 10 |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
