@@ -70,6 +70,25 @@ check("Legendre-40 exact for all 25 <= x <= 3000", True,
 check("x in [2, 24] where Legendre-40 is exact", [4],
       [x for x in range(2, 25) if legendre40(x) == sympy.primepi(x)])
 
+print("== Paper 1: the 42,000-digit window")
+import sys
+sys.set_int_max_str_digits(0)
+a_big, w_big = 10 ** 41999, 100_000
+b_big = a_big + w_big - 1
+pos = np.arange(w_big)
+ending = (a_big % 10 + pos) % 10
+alive = np.isin(ending, [1, 3, 7, 9])
+check("candidates in the window", 40000, int(alive.sum()))
+counts = [K(b_big // p) - K(-(-a_big // p) - 1) for p in (3, 7, 11, 997, 999_983)]
+check("multiple counts by formula", [13332, 5715, 3637, 40, 0], counts)
+one_by_one = [int(np.isin(ending[(-a_big) % p::p], [1, 3, 7, 9]).sum()) for p in (3, 7, 11, 997, 999_983)]
+check("formula equals crossing out one by one", counts, one_by_one)
+sp = [p for p in sympy.primerange(3, 10**6 + 1) if p != 5]
+for p in sp:
+    alive[(-a_big) % p::p] = False
+check("survivors after primes to 10^6", 4094, int(alive.sum()))
+check("product-rule estimate", 4064, round(40000 * prod(1 - 1 / p for p in sp)))
+
 print("== Paper 2: the zeta map")
 z40 = mp.zeta(2) * mp.mpf(3) / 4 * mp.mpf(24) / 25
 direct = mp.nsum(lambda k: sum(1 / (10 * k + r) ** 2 for r in (1, 3, 7, 9)), [0, mp.inf])

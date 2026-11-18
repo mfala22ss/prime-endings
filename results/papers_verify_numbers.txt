@@ -10,6 +10,12 @@
 [PASS] Legendre-40 at x = 24 (outside range): paper 8 | computed 8
 [PASS] Legendre-40 exact for all 25 <= x <= 3000: paper True | computed True
 [PASS] x in [2, 24] where Legendre-40 is exact: paper [4] | computed [4]
+== Paper 1: the 42,000-digit window
+[PASS] candidates in the window: paper 40000 | computed 40000
+[PASS] multiple counts by formula: paper [13332, 5715, 3637, 40, 0] | computed [13332, 5715, 3637, 40, 0]
+[PASS] formula equals crossing out one by one: paper [13332, 5715, 3637, 40, 0] | computed [13332, 5715, 3637, 40, 0]
+[PASS] survivors after primes to 10^6: paper 4094 | computed 4094
+[PASS] product-rule estimate: paper 4064 | computed 4064
 == Paper 2: the zeta map
 [PASS] zeta_(10)(2): paper 1.184352528130723 | computed 1.184352528130723
 [PASS] zeta_(10)(2) direct sum agrees to 25 digits: paper True | computed True
@@ -30,4 +36,4 @@
 [PASS] zero 3 height: paper 25.0108575801 | computed 25.0108575801
 [PASS] |zeta(rho_3)| < 1e-25: paper True | computed True
 
-29 of 29 checks passed
+34 of 34 checks passed

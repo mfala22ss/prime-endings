@@ -429,6 +429,8 @@ Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61
 
 Status: ESTABLISHED by this run. The method gives the exact prime count at every checkpoint, and the prediction is within 0.4%, improving with x.
 
+Also added to paper 1 (section 4.5, "A complete run to 10^10").
+
 ## Step 16. The method on a 42,000-digit number
 
 **What was asked.** For a number with tens of thousands of digits, how can the 60% be stripped, and how can the multiples be found and counted?
@@ -441,6 +443,8 @@ Status: ESTABLISHED by this run. The method gives the exact prime count at every
 4. **What this cannot do:** a full sieve needs every prime up to √a, a 21,000-digit number; there are far too many of them to list. The window is expected to hold about 100,000 / ln a = 100,000 / 96,709 ≈ 1 prime, so about 1 survivor in 4,000 is prime. The survivors must each be checked with a primality test (Miller-Rabin, as in the Lean report).
 
 Status: ESTABLISHED by this run for steps 1 to 3; step 4 is the known limit of sieving.
+
+Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000-digit window); [`papers/verify_numbers.py`](papers/verify_numbers.py) now re-checks these numbers too (34 of 34 checks pass).
 
 ## Interactive multiples grid
 

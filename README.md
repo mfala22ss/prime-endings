@@ -7,7 +7,7 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 **Step-by-step account of everything done, with results:** [WALKTHROUGH.md](WALKTHROUGH.md) ([PDF](docs/Walkthrough.pdf)).
 
 **Papers (journal format):**
-* [A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof](papers/sieve-window/sieve-window.pdf) (5 pages)
+* [A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof](papers/sieve-window/sieve-window.pdf) (6 pages)
 * [The decimal sieve through the Riemann zeta function and a Dirichlet L-function](papers/zeta-map/zeta-map.pdf) (4 pages)
 
 **License:** code under MIT, papers and written documentation under CC BY 4.0 (see [License and citation](#license-and-citation)). To cite this work, use [CITATION.cff](CITATION.cff).
@@ -482,7 +482,7 @@ The fast array sieve used for the reports (`primesUpTo`, `primesBetween`) is a s
 
 ## Papers
 
-Two short papers in journal format, written for an academic reader with no names, are in [`papers/`](papers): one on the window sieve and its Lean proof, and one mapping the sieve onto the zeta function. Every number in them is recomputed by [`papers/verify_numbers.py`](papers/verify_numbers.py) (29 of 29 checks pass).
+Two short papers in journal format, written for an academic reader with no names, are in [`papers/`](papers): one on the window sieve and its Lean proof, and one mapping the sieve onto the zeta function. Every number in them is recomputed by [`papers/verify_numbers.py`](papers/verify_numbers.py) (34 of 34 checks pass).
 
 ## What "verified by Lean" means
 
