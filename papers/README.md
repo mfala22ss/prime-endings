@@ -1,11 +1,11 @@
 # Papers
 
-Two short manuscripts written in journal format (AMS article class), prepared for double-blind review.
+Two short manuscripts in journal format (AMS article class). They carry no author name: the repository link https://github.com/mfala22ss/prime-endings is at the bottom of every page, and each ends with a section citing Claude Opus 5.5 (Anthropic), the AI assistant used in the work, and describing what it did.
 
 | Folder | Paper | Pages |
 |---|---|---|
 | [`sieve-window/`](sieve-window/sieve-window.pdf) | *A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof* | 6 |
-| [`zeta-map/`](zeta-map/zeta-map.pdf) | *The decimal sieve through the Riemann zeta function and a Dirichlet L-function: an expository account with numerical checks* | 4 |
+| [`zeta-map/`](zeta-map/zeta-map.pdf) | *The decimal sieve through the Riemann zeta function and a Dirichlet L-function: an expository account with numerical checks* | 5 |
 
 Shared files:
 

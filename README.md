@@ -16,9 +16,25 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 
 ---
 
+## How this project was made
+
+This project is mine; the work was done with the help of an AI assistant, **Claude Opus 5.5** (model `claude-opus-5-5`, by Anthropic), used through **Claude Code** on my Mac between 15 and 18 November 2026. The split of the work was:
+
+| I did | The assistant did, at my direction |
+|---|---|
+| Had the starting idea: keep 2, 3 and 5, throw away the 60% of numbers ending in 0, 2, 4, 5, 6, 8, then remove the multiples of primes from the remaining 40% | Wrote the Python scripts for each step and ran them on my machine |
+| Asked every question, one step at a time: density, endings, spacing, the multiples grid, the square-root rule, huge numbers, the zeta function | Checked every number against independent software (primecount, sympy, mpmath) and saved the outputs in [`results`](results) |
+| Decided what counts as "our model" (the method itself, with a density derived from mathematics, not one trained on data) and corrected wrong framings along the way (for example, that 2, 3 and 5 are kept, never removed) | Drafted the Lean proofs and compiled them against Mathlib locally before I ran them |
+| Ran every proof check myself on Comparator Live, using the site's own challenge | Built the interactive multiples grid, wrote this README, the [WALKTHROUGH](WALKTHROUGH.md) and the [papers](papers), and checked every reference against its Crossref record |
+| Decided what is published, under which license, and when | Kept the repository in order: commits, PDFs, and the record of every run |
+
+**Why the results do not depend on trusting the assistant.** Every number is recomputed by a script that anyone can run, every proof is checked by the Lean kernel (on Comparator Live, not just on my machine), and mistakes made along the way were caught by these checks and are recorded rather than hidden, for example the gap share corrected from 43.9% to 44.53%, an ending count that was off by one, and the counting formula that turned out to need x ≥ 25.
+
+---
+
 ## What is proved, at a glance
 
-**30 theorems.** The first 27 were checked by Lean on Comparator Live in run 9 (18 November 2026); the 3 newest (marked *new*) compile with no errors locally and are waiting for their Comparator run. Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-two-latest-runs).
+**30 theorems, all checked by Lean on Comparator Live in run 10 (18 November 2026).** Each name links to its line in [`lean/Solution.lean`](lean/Solution.lean); each heading links to the section that explains it. Screenshots of the run, with the exact file checked, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
 
 **[The filter (the 40%)](#the-idea-in-one-table)**
 * Every prime above 5 ends in 1, 3, 7 or 9 ([`prime_ending`](lean/Solution.lean#L34); explained in [Proof 1](#proof-1-why-every-prime-above-5-ends-in-1-3-7-or-9)).
@@ -37,7 +53,7 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 * The start and stop multipliers, max(p, ⌈a/p⌉) and ⌊b/p⌋, give exactly the multiples of p from p × p onwards that fall in [a, b] ([`multiplier_range`](lean/Solution.lean#L233)).
 * In any range, what survives is exactly the primes in it, with none lost and no non-prime left ([`window_sieve`](lean/Solution.lean#L250); tested on a 42,000-digit window in [WALKTHROUGH step 16](WALKTHROUGH.md)).
 
-**How far the primes we know can reach** *(new)*
+**How far the primes we know can reach**
 * The primes up to Y decide every number below (Y + 1)²: a number there that none of them divides is prime ([`known_primes_reach`](lean/Solution.lean#L299)).
 * The primes up to Y determine all the primes up to Y × Y. Each prime p is found at p but first needed at p × p, so the sieve, run upwards from 1, always finds every prime before it needs it ([`bootstrap`](lean/Solution.lean#L313)).
 * But no fixed list of primes is enough forever: whatever list you stop at, the square of the next prime gets through ([`known_primes_not_enough`](lean/Solution.lean#L335)).
@@ -67,6 +83,7 @@ Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact
 
 ## Contents
 
+0. [How this project was made](#how-this-project-was-made)
 0. [What is proved, at a glance](#what-is-proved-at-a-glance)
 1. [The question in plain words](#the-question-in-plain-words)
 2. [Terms and formulas used everywhere below](#terms-and-formulas-used-everywhere-below)
@@ -362,11 +379,11 @@ The Lean report can list primes in a window at any size. In the 100,000 numbers 
 
 ## The Lean proofs
 
-File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36, run 9, 18 November 2026). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
+File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36, run 10, 18 November 2026). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
 
-### Certified on Comparator Live: the two latest runs
+### Certified on Comparator Live: the latest runs
 
-Both runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib. The certificate names `InfinitudeOfPrimes`, the site's statement. To check that one theorem, Comparator must first compile the whole solution file, so a pass also means that every other proof in the file was checked by Lean: a single wrong step anywhere would have stopped the build.
+All three runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib. The certificate names `InfinitudeOfPrimes`, the site's statement. To check that one theorem, Comparator must first compile the whole solution file, so a pass also means that every other proof in the file was checked by Lean: a single wrong step anywhere would have stopped the build.
 
 **Run 8, 18 November 2026: 24 theorems**
 
@@ -385,12 +402,23 @@ What it proved:
 
 ![Comparator Live, run 9: Success](docs/img/comparator-run9-27-theorems.png)
 
-Code: [`lean/runs/run9_SolutionProofsOnly_27_theorems.lean`](lean/runs/run9_SolutionProofsOnly_27_theorems.lean) (SHA-256 starts a0e444f0; the same file as [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean))
+Code: [`lean/runs/run9_SolutionProofsOnly_27_theorems.lean`](lean/runs/run9_SolutionProofsOnly_27_theorems.lean) (SHA-256 starts a0e444f0)
 
 What it proved: everything in run 8, plus the sieve on **any range [a, b]**, not only from 1:
 * If p ends in 1, 3, 7 or 9, then p × k is in the 40% exactly when k is (`mul_coprime_ten`).
 * Starting each prime p at k = max(p, ⌈a/p⌉) and stopping at ⌊b/p⌋ gives exactly its multiples from p × p on that lie in [a, b] (`multiplier_range`).
 * In any range, the numbers that end in 1, 3, 7 or 9, are above 5 and are not crossed out are exactly the primes in it: none lost, no non-prime left (`window_sieve`).
+
+**Run 10, 18 November 2026: all 30 theorems**
+
+*(Screenshot to be added: Comparator Live showed "Success ... InfinitudeOfPrimes ... the challenge is recognized" for this file.)*
+
+Code: [`lean/runs/run10_SolutionProofsOnly_30_theorems.lean`](lean/runs/run10_SolutionProofsOnly_30_theorems.lean) (SHA-256 starts 050ccaf2; the same file as [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean))
+
+What it proved: everything in run 9, plus how far the primes we know can reach:
+* The primes up to Y decide every number below (Y + 1)² (`known_primes_reach`).
+* The primes up to Y determine all primes up to Y × Y, so the sieve finds every prime before it needs it (`bootstrap`).
+* No fixed list of primes is enough forever: the square of the next prime always gets through (`known_primes_not_enough`).
 
 Earlier runs (1 to 7), including the first pass of the same challenge on 15 November 2026, are listed in the [run log](WALKTHROUGH.md#run-log).
 
@@ -488,7 +516,7 @@ The fast array sieve used for the reports (`primesUpTo`, `primesBetween`) is a s
 
 ## Papers
 
-Two short papers in journal format, written for an academic reader with no names, are in [`papers/`](papers): one on the window sieve and its Lean proof, and one mapping the sieve onto the zeta function. Every number in them is recomputed by [`papers/verify_numbers.py`](papers/verify_numbers.py) (34 of 34 checks pass).
+Two short papers in journal format, written for an academic reader, are in [`papers/`](papers): one on the window sieve and its Lean proof, and one mapping the sieve onto the zeta function. They carry no author name; the repository link is at the bottom of every page, and each ends with a statement citing Claude Opus 5.5 for its part in the work. Every number in them is recomputed by [`papers/verify_numbers.py`](papers/verify_numbers.py) (34 of 34 checks pass).
 
 ## What "verified by Lean" means
 
@@ -502,11 +530,11 @@ Two short papers in journal format, written for an academic reader with no names
 
 **What has been checked so far.** Every Comparator run is listed, with its outcome, in the [run log](WALKTHROUGH.md#run-log). In short:
 
-* **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 27 theorems, including the window theorems ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean), run 9). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
+* **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 30 theorems ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean), run 10). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
 
-  Screenshots of the two latest runs, with their code and what each proved, are in [Certified on Comparator Live](#certified-on-comparator-live-the-two-latest-runs).
+  Screenshots of the two latest runs, with their code and what each proved, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
 
-* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 19 theorems. It passed on Comparator for the first 6 (run 1). All 19 are also covered by run 9, in which the whole file compiled on Comparator; they use only Lean's three standard axioms.
+* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 22 theorems. It passed on Comparator for the first 6 (run 1). All 22 are also covered by run 10, in which the whole file compiled on Comparator; they use only Lean's three standard axioms.
 
 **What verification does and does not give.**
 

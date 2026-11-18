@@ -6,6 +6,14 @@
 \usepackage[final]{microtype}
 \usepackage{booktabs}
 \usepackage[margin=1.15in]{geometry}
+\usepackage{fancyhdr}
+\fancypagestyle{firstpage}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyhead[C]{\footnotesize THE DECIMAL SIEVE AND THE ZETA FUNCTION}
+\fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
 
 \newtheorem{proposition}{Proposition}[section]
@@ -17,13 +25,11 @@
 
 \title[The decimal sieve and the zeta function]{The decimal sieve through the Riemann zeta function and a Dirichlet L-function: an expository account with numerical checks}
 
-\author{Anonymous}
-\address{Manuscript prepared for double-blind review}
 
 \subjclass[2020]{Primary 11M06, 11N05; Secondary 11N13, 11Y35}
 \keywords{Riemann zeta function, Euler product, Mertens' theorem, Dirichlet $L$-function, Chebyshev's bias, explicit formula}
 
-\date{17 November 2026}
+\date{18 November 2026}
 
 \begin{document}
 
@@ -150,6 +156,9 @@ Fluctuations of $\pi(x)$ & Zeros of $\zeta$ & Explicit formula\\
 \section{Numerical checks}\label{sec:checks}
 
 All values above were recomputed with the script \texttt{verify\_numbers.py} that accompanies this note, using \texttt{mpmath} at $30$ significant digits, \texttt{sympy}, and the program \texttt{primecount} \cite{primecount} for $\pi(9973^2)$. The checks include the closed form and the direct sum for $\zt(2)$, the Mertens product and its asymptotic value at $y=9973$, the ratio $1.0564$, the identity $L(1,\chi)=\frac32L(1,\chi_5)$ against the direct sum, the counts in Table~\ref{tab:endings} from a sieve to $10^7$, and the first three zeros together with $|\zeta(\rho_k)|<10^{-25}$. All checks pass.
+
+\section*{Use of an AI assistant}
+This work was carried out with the assistance of Claude Opus 5.5 \cite{Claude}, a large language model developed by Anthropic, used through the Claude Code command-line tool between 15 and 18 November 2026. The questions, the method studied and the decisions about what to test are the author's. Under the author's direction, the assistant wrote and ran the computer programs, drafted the Lean proofs and compiled them, checked references against their Crossref records, and drafted this manuscript. No claim rests on the assistant's output alone: every number is recomputed by an independent script, every formal result is checked by the Lean kernel, and errors found during the work are recorded in the repository \cite{Repo}, which contains all code, data and proofs.
 
 \bibliographystyle{amsplain}
 \bibliography{../references}

@@ -407,7 +407,7 @@ Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61
 * The ending counts up to 10^7 are for primes above 5.
 * Unchecked figures (the "67 to 10" error, the prize amount) were removed rather than kept.
 
-**Step 4: the papers.** [`papers/`](papers) holds two papers in AMS journal format (XeLaTeX, STIX Two fonts), authored "Anonymous" for double-blind review, with a shared bibliography of 16 references, each checked against Crossref. [`papers/verify_numbers.py`](papers/verify_numbers.py) recomputes every number in both papers: 29 of 29 checks pass ([`results/papers_verify_numbers.txt`](results/papers_verify_numbers.txt)).
+**Step 4: the papers.** [`papers/`](papers) holds two papers in AMS journal format (XeLaTeX, STIX Two fonts), (on 18 November 2026 the "Anonymous" author line was replaced by the repository link at the foot of every page, and an AI-use statement citing Claude Opus 5.5 was added), with a shared bibliography of 16 references, each checked against Crossref. [`papers/verify_numbers.py`](papers/verify_numbers.py) recomputes every number in both papers: 29 of 29 checks pass ([`results/papers_verify_numbers.txt`](results/papers_verify_numbers.txt)).
 
 **Step 5: license and citation.** Code stays MIT. The papers are CC BY 4.0, which requires credit on reuse. [`CITATION.cff`](CITATION.cff) adds GitHub's "Cite this repository" button.
 
@@ -450,7 +450,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 **What was asked.** For arbitrarily long numbers, do the primes we already know cross out every non-prime to come, and can that be proved?
 
-**The answer, in two parts, both proved in Lean** (compiled locally with no errors, only the standard axioms; Comparator run pending):
+**The answer, in two parts, both proved in Lean** (compiled locally with no errors, only the standard axioms, and passed on Comparator Live as run 10 on 18 November 2026):
 
 1. **The sieve finds each prime before it needs it** (`known_primes_reach`, `bootstrap`). Knowing the primes up to Y settles every number up to Y × Y. A prime p is discovered at p and first needed at p × p, which is always later. So the sieve, run upwards from 1, never runs out: 11 is found at 11 and starts working at 121; 13 is found at 13 and starts at 169. Each round of known primes covers about twice as many digits as the last.
 2. **But a fixed list is never enough** (`known_primes_not_enough`). If the list stops at some prime, the square of the next prime gets through as a fake prime. Stop at 11, and 169 = 13 × 13 survives.
@@ -479,7 +479,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 compiles with no errors locally (ESTABLISHED locally); its Comparator run is PENDING.
+Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 is ESTABLISHED on Comparator Live too (run 10, all 30 theorems).
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -522,7 +522,8 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | 7 | Built-in "There Are Infinitely Many Primes" | L5 version | Covered by run 8 |
 | 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
 | 9 | Built-in "There Are Infinitely Many Primes" | Updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean): all 27 theorems, including `mul_coprime_ten`, `multiplier_range` and `window_sieve` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled |
-| local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Comparator run **PENDING** |
+| 10 | Built-in "There Are Infinitely Many Primes" | [`lean/runs/run10_SolutionProofsOnly_30_theorems.lean`](lean/runs/run10_SolutionProofsOnly_30_theorems.lean) (SHA-256 050ccaf2...): all 30 theorems, adding `known_primes_reach`, `bootstrap`, `known_primes_not_enough` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib) |
+| local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Then passed on Comparator as run 10 |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.

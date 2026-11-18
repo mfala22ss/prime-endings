@@ -8,6 +8,14 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage[margin=1.15in]{geometry}
+\usepackage{fancyhdr}
+\fancypagestyle{firstpage}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyhead[C]{\footnotesize A WINDOW SIEVE ON THE RESIDUES PRIME TO 10}
+\fancyfoot[L]{\footnotesize \url{https://github.com/mfala22ss/prime-endings}}\fancyfoot[R]{\footnotesize\thepage}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -27,13 +35,11 @@
 
 \title[A window sieve on the residues prime to 10]{A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof}
 
-\author{Anonymous}
-\address{Manuscript prepared for double-blind review}
 
 \subjclass[2020]{Primary 11N35, 11A41; Secondary 11Y11, 68V20}
 \keywords{sieve of Eratosthenes, wheel sieve, segmented sieve, Legendre's formula, prime counting, formal verification, Lean}
 
-\date{17 November 2026}
+\date{18 November 2026}
 
 
 \begin{document}
@@ -191,7 +197,7 @@ Finally, the method was run in full, in blocks of $10^8$, from $1$ to $10^{10}$:
 
 \section{Formal verification}\label{sec:formal}
 
-The statements of Section~\ref{sec:window} have been formalised in Lean~4 \cite{Lean4} using Mathlib \cite{Mathlib2020}. The file compiles without errors under Lean v4.34.0-rc1 with the Mathlib revision of 17 August 2026 (commit \texttt{818f61d}), and, apart from the results in the last two rows of Table~\ref{tab:lean}, which were added afterwards and have so far been compiled only locally, under Lean v4.36.0 with the current Mathlib on the Comparator Live service of the Lean project (18 November 2026); and the command \lean{\#print axioms} reports that the three window results depend only on \lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}, the standard axioms of Lean's logic. Table~\ref{tab:lean} matches the results of this paper to their Lean names.
+The statements of Section~\ref{sec:window} have been formalised in Lean~4 \cite{Lean4} using Mathlib \cite{Mathlib2020}. The file compiles without errors under Lean v4.34.0-rc1 with the Mathlib revision of 17 August 2026 (commit \texttt{818f61d}), and, under Lean v4.36.0 with the current Mathlib on the Comparator Live service of the Lean project (18 November 2026), and the command \lean{\#print axioms} reports that the three window results depend only on \lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}, the standard axioms of Lean's logic. Table~\ref{tab:lean} matches the results of this paper to their Lean names.
 
 \begin{table}[ht]
 \centering
@@ -227,6 +233,9 @@ Three things are \emph{not} established by the formalisation, and we state them 
 \section{Reproducibility}\label{sec:reproduce}
 
 The script \texttt{verify\_numbers.py} that accompanies this paper recomputes every number stated above. It checks Theorem~\ref{thm:window} on $500$ random windows with $a\le 10^6$ and width up to $2000$; Corollary~\ref{cor:legendre} for every $25\le x\le 3000$, together with the list of $x\in[2,24]$ at which it holds; the full content of Table~\ref{tab:window}; the example at $10^{28}$; $\pi(10^{14})$, which it obtains from the program \texttt{primecount} \cite{primecount}; and the multiple counts and survivor count of the $42\,000$-digit window. All checks pass. The complete run to $10^{10}$ is the separate script \texttt{step14\_method\_to\_1e10.py} in the same repository (about one minute).
+
+\section*{Use of an AI assistant}
+This work was carried out with the assistance of Claude Opus 5.5 \cite{Claude}, a large language model developed by Anthropic, used through the Claude Code command-line tool between 15 and 18 November 2026. The questions, the method studied and the decisions about what to test are the author's. Under the author's direction, the assistant wrote and ran the computer programs, drafted the Lean proofs and compiled them, checked references against their Crossref records, and drafted this manuscript. No claim rests on the assistant's output alone: every number is recomputed by an independent script, every formal result is checked by the Lean kernel, and errors found during the work are recorded in the repository \cite{Repo}, which contains all code, data and proofs.
 
 \bibliographystyle{amsplain}
 \bibliography{../references}
