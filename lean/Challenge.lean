@@ -66,3 +66,12 @@ def CrossedOut (a b n : ℕ) : Prop :=
 theorem window_sieve (a b n : ℕ) :
     (a ≤ n ∧ n ≤ b ∧ 5 < n ∧ Nat.Coprime n 10 ∧ ¬ CrossedOut a b n) ↔
       (n.Prime ∧ max a 6 ≤ n ∧ n ≤ b) := sorry
+
+theorem known_primes_reach (Y n : ℕ) (hn : 1 < n) (hY : n < (Y + 1) * (Y + 1))
+    (h : ∀ p, p.Prime → p ≤ Y → ¬ p ∣ n) : n.Prime := sorry
+
+theorem known_primes_not_enough (Y : ℕ) :
+    ∃ n, 1 < n ∧ ¬ n.Prime ∧ ∀ p, p.Prime → p ≤ Y → ¬ p ∣ n := sorry
+
+theorem bootstrap (Y n : ℕ) (hn : n ≤ Y * Y) :
+    n.Prime ↔ (1 < n ∧ ∀ p, p.Prime → p ≤ Y → p ∣ n → p = n) := sorry

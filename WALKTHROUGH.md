@@ -446,6 +446,17 @@ Status: ESTABLISHED by this run for steps 1 to 3; step 4 is the known limit of s
 
 Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000-digit window); [`papers/verify_numbers.py`](papers/verify_numbers.py) now re-checks these numbers too (34 of 34 checks pass).
 
+## Step 17. Can the primes we already know cross out all the numbers to come?
+
+**What was asked.** For arbitrarily long numbers, do the primes we already know cross out every non-prime to come, and can that be proved?
+
+**The answer, in two parts, both proved in Lean** (compiled locally with no errors, only the standard axioms; Comparator run pending):
+
+1. **The sieve finds each prime before it needs it** (`known_primes_reach`, `bootstrap`). Knowing the primes up to Y settles every number up to Y × Y. A prime p is discovered at p and first needed at p × p, which is always later. So the sieve, run upwards from 1, never runs out: 11 is found at 11 and starts working at 121; 13 is found at 13 and starts at 169. Each round of known primes covers about twice as many digits as the last.
+2. **But a fixed list is never enough** (`known_primes_not_enough`). If the list stops at some prime, the square of the next prime gets through as a fake prime. Stop at 11, and 169 = 13 × 13 survives.
+
+**What it means for huge numbers.** Nothing in the logic breaks at any size. What breaks is the work: to sieve a window of 42,000-digit numbers completely, the sieve must first have found every prime up to a 21,000-digit number, and there are far too many to list. That is why huge windows are pre-sieved with the small primes and the survivors are tested one by one (step 16).
+
 ## Interactive multiples grid
 
 **Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
@@ -468,7 +479,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: all stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems).
+Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems). Stage L7 compiles with no errors locally (ESTABLISHED locally); its Comparator run is PENDING.
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -491,6 +502,9 @@ Status: all stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 
 | L6 | `mul_coprime_ten` | If p ends in 1, 3, 7 or 9, then p × k ends in one of them exactly when k does: multiples of p inside the 40% are p × (numbers ending in 1, 3, 7, 9) |
 | L6 | `multiplier_range` | Starting at k = max(p, ⌈a/p⌉) and stopping at ⌊b/p⌋ is exactly the same as asking p ≤ k and a ≤ p × k ≤ b |
 | L6 | `window_sieve` | The sieve on any window [a, b]: a number in the window that ends in 1, 3, 7 or 9, is above 5, and is not crossed out, is prime; and every prime in [max(a, 6), b] survives |
+| L7 | `known_primes_reach` | If every prime up to Y is known, any number below (Y + 1)² that none of them divides is prime |
+| L7 | `bootstrap` | The primes up to Y determine all primes up to Y × Y: each prime is found before it is needed |
+| L7 | `known_primes_not_enough` | No fixed, finite list of primes crosses out every non-prime: the square of the next prime always gets through |
 
 <a id="run-log"></a>
 
@@ -508,6 +522,7 @@ Status: all stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 
 | 7 | Built-in "There Are Infinitely Many Primes" | L5 version | Covered by run 8 |
 | 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
 | 9 | Built-in "There Are Infinitely Many Primes" | Updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean): all 27 theorems, including `mul_coprime_ten`, `multiplier_range` and `window_sieve` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled |
+| local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Comparator run **PENDING** |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.

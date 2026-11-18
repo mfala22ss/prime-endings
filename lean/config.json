@@ -20,7 +20,10 @@
         "three_seven_fails_at_121",
         "mul_coprime_ten",
         "multiplier_range",
-        "window_sieve"
+        "window_sieve",
+        "known_primes_reach",
+        "bootstrap",
+        "known_primes_not_enough"
     ],
     "permitted_axioms": [
         "propext",

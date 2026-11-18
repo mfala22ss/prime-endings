@@ -18,6 +18,9 @@ Main results:
   primes up to 120, and first fail at 121 = 11 × 11.
 * `mul_coprime_ten`, `multiplier_range`, `window_sieve`: the sieve on any window `[a, b]`,
   started at `max p ⌈a/p⌉` for each sieving prime, keeps exactly the primes in `[max a 6, b]`.
+* `known_primes_reach`, `bootstrap`, `known_primes_not_enough`: the primes up to `Y` decide every
+  number up to `Y²`, so the sieve finds each prime before it needs it; but no fixed, finite list
+  of primes is enough forever.
 
 Computation: `report a b g` lists the primes in `[a, b]` together with summary statistics.
 Windows with `√b ≤ 2·10⁶` are sieved exactly. Larger windows are pre-sieved by all primes up to
@@ -286,6 +289,55 @@ theorem window_sieve (a b n : ℕ) :
       rcases hp.eq_one_or_self_of_dvd p (Dvd.intro k hpk) with h | h
       · omega
       · rw [h] at hpk'; have := hp.pos; nlinarith
+
+/-! ## How far the primes we already know can reach -/
+
+/-- **Known primes reach to the next square.** If every prime up to `Y` is known, they decide
+    every number below `(Y + 1)²`: a number `1 < n < (Y + 1)²` that none of them divides is prime.
+    So knowing the primes up to `Y` gives all primes up to about `Y²`, and those in turn give all
+    primes up to about `Y⁴`: each round roughly doubles the number of digits covered. -/
+theorem known_primes_reach (Y n : ℕ) (hn : 1 < n) (hY : n < (Y + 1) * (Y + 1))
+    (h : ∀ p, p.Prime → p ≤ Y → ¬ p ∣ n) : n.Prime := by
+  by_contra hnp
+  have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+  have hle : n.minFac ≤ Y := by
+    by_contra hgt
+    have hY1 : Y + 1 ≤ n.minFac := by omega
+    nlinarith
+  exact h n.minFac (Nat.minFac_prime (by omega)) hle (Nat.minFac_dvd n)
+
+/-- **The sieve finds its own primes (bootstrapping).** For every `n ≤ Y * Y`: `n` is prime exactly
+    when `1 < n` and no prime up to `Y` other than `n` itself divides it. So the primes up to `Y`
+    determine all primes up to `Y²`. Each prime `p` is found at `p` and first needed at `p * p`,
+    so the sieve, run upwards from 1, always has every prime it needs before it needs it. -/
+theorem bootstrap (Y n : ℕ) (hn : n ≤ Y * Y) :
+    n.Prime ↔ (1 < n ∧ ∀ p, p.Prime → p ≤ Y → p ∣ n → p = n) := by
+  constructor
+  · intro hp
+    refine ⟨hp.one_lt, fun p hpp _ hdvd => ?_⟩
+    rcases hp.eq_one_or_self_of_dvd p hdvd with h | h
+    · exact absurd h hpp.one_lt.ne'
+    · exact h
+  · rintro ⟨h1, h⟩
+    by_contra hnp
+    have hsq : n.minFac ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+    have hle : n.minFac ≤ Y := by
+      by_contra hgt
+      have hY1 : Y + 1 ≤ n.minFac := by omega
+      nlinarith
+    have hmp : n.minFac.Prime := Nat.minFac_prime (by omega)
+    have := h n.minFac hmp hle (Nat.minFac_dvd n)
+    exact hnp (this ▸ hmp)
+
+/-- **No finite list of primes is enough forever.** Whatever `Y` is, some non-prime above 1 is
+    divisible by no prime up to `Y`: the square of the first prime above `Y`. So the primes known
+    at any moment can never cross out all the non-primes still to come. -/
+theorem known_primes_not_enough (Y : ℕ) :
+    ∃ n, 1 < n ∧ ¬ n.Prime ∧ ∀ p, p.Prime → p ≤ Y → ¬ p ∣ n := by
+  obtain ⟨q, hqY, hq⟩ := Nat.exists_infinite_primes (Y + 1)
+  refine ⟨q * q, by nlinarith [hq.one_lt], square_not_prime q hq, fun p hp hpY hdvd => ?_⟩
+  have := square_needs_p q p hq hp hdvd
+  omega
 
 /-- Challenge definition (Comparator Live, "There Are Infinitely Many Primes"). -/
 def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n
