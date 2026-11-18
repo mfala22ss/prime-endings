@@ -24,7 +24,7 @@ SOFTWARE.
 
 Scope of the licenses in this repository
 
-1. Software (everything in python/, lean/, tools/, web/ and papers/verify_numbers.py,
+1. Software (everything in python/, lean/ and papers/verify_numbers.py,
    papers/build.sh): the MIT License above.
 
 2. Papers and written documentation (the manuscripts and PDFs in papers/,

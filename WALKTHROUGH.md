@@ -254,7 +254,7 @@ A full sieve would need every prime up to the square root of 10^29 (316,227,766,
 
 ## Tables: the multiples of 3 and 7
 
-**Built.** [`python/tables/multiples.py`](python/tables/multiples.py), producing [`docs/tables/Multiples.pdf`](docs/tables/Multiples.pdf) and the grids as CSV ([3](data/multiples_of_3_33x33.csv), [7](data/multiples_of_7_33x33.csv)).
+**Built.** `python/tables/multiples.py`, producing the tables as a PDF and the grids as CSV files (kept in the private companion repository since 18 November 2026).
 
 For each prime, the first 111 multiples in rows of 10, then a 33 x 33 grid of the first 1,089 multiples. Amber cells are inside the 40% and crossed out first by that prime in the sieve; grey cells are inside the 40% but were already crossed out by 3.
 
@@ -459,7 +459,7 @@ Also added to paper 1 (sections 4.3 and 4.4: the counting formula and the 42,000
 
 ## Interactive multiples grid
 
-**Built.** [`web/multiples-grid.html`](web/multiples-grid.html), a single file that works offline, from the module [`web/multiples-grid.snippet.html`](web/multiples-grid.snippet.html). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
+**Built.** `web/multiples-grid.html`, a single file that works offline, from the module `web/multiples-grid.snippet.html` (both kept in the private companion repository since 18 November 2026). The same module is added as a "Multiples grid" tab to the Prime Pyramid page in `~/Primes` (open it directly with `#multiples` at the end of the address).
 
 **What it does.**
 

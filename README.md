@@ -4,7 +4,7 @@
 
 Every prime above 5 ends in 1, 3, 7 or 9. This project starts from that one fact and follows it as far as it goes: how many primes the 40% of numbers with those endings contain, how fast that share falls, how the four endings compare, how primes ending in 1 are spaced, and what it takes to get from the 40% down to the primes alone. Every number is computed and checked against independent software. The central facts are proved in Lean 4 and checked by the Lean kernel.
 
-**Step-by-step account of everything done, with results:** [WALKTHROUGH.md](WALKTHROUGH.md) ([PDF](docs/Walkthrough.pdf)).
+**Step-by-step account of everything done, with results:** [WALKTHROUGH.md](WALKTHROUGH.md).
 
 **Papers (journal format):**
 * [A window form of the sieve of Eratosthenes on the residues prime to ten, with a machine-checked proof](papers/sieve-window/sieve-window.pdf) (6 pages)
@@ -175,7 +175,7 @@ This fitted curve is **only a check**. It confirms that the data point to our mo
 
 ## The idea in one table
 
-Every number from 1 to **x = 10,000,000,000** (ten billion), sorted by last digit and counted exactly ([`data/breakdown_by_ending.csv`](data/breakdown_by_ending.csv)). The "Prime" and "Not prime" columns are percentages of **all ten billion numbers**, not of the row.
+Every number from 1 to **x = 10,000,000,000** (ten billion), sorted by last digit and counted exactly (by `make_prime_tables.py`, kept in the private companion repository; the totals are re-checked against primecount in [`results/step4_endings.txt`](results/step4_endings.txt)). The "Prime" and "Not prime" columns are percentages of **all ten billion numbers**, not of the row.
 
 | Group | Count | Prime | Not prime | Total |
 |--------------------------|----------------:|------------------:|----------------:|--------:|
@@ -564,10 +564,8 @@ Two short papers in journal format, written for an academic reader, are in [`pap
 | `steps/step14_method_to_1e10.py` | Runs our three-step method itself to 10^10 in blocks; compares with primecount and with our model's prediction | 1 min |
 | `steps/step16_huge_numbers.py` | Our method on a 42,000-digit window: strips the 60%, counts multiples by formula, partial sieve to 10^6 | 2 s |
 | `steps/step13_find_zeros.py` | Zeta workings step by step; finds all 138 zeros up to height 300 and proves none were missed | 1 min |
-| `make_prime_tables.py` | Writes `data/primes_40pct_up_to_1e6.csv` and `data/breakdown_by_ending.csv` | 1 min |
-| `extras/density_models.py` | Compares fitted models with li(x), Riemann's R(x) and up to 1,000 zeta-zero waves | 6 s |
-| `extras/legendre_endings.py` | Refits Legendre's 1808 constant from density data; models the bias between endings | 5 s |
-| `extras/primes_ml.py` | Density regression, a primality classifier, and gap statistics | 5 s |
+
+Early exploratory scripts (density models, a Legendre fit, a machine-learning experiment), the table generators, the generated CSV data, the interactive grid page and the PDF builds are kept in a separate private repository; they are not needed to read, check or reproduce any claim here.
 
 Times were measured on an Apple-silicon Mac. Scripts that sieve to 10^9 need about 1 GB of memory.
 
