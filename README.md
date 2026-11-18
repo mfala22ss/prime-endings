@@ -312,7 +312,7 @@ The Lean report can list primes in a window at any size. In the 100,000 numbers 
 
 ## The Lean proofs
 
-File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and, for the earlier versions, on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
+File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors against Mathlib locally (Lean 4.34, Mathlib commit 818f61d) and on [Comparator Live](https://comparator.live.lean-lang.org) (Lean v4.36, run 9, 18 November 2026). Which run certified what is in the [run log](WALKTHROUGH.md#run-log).
 
 **What the proofs establish** (all 27 theorems compile with no gaps; see [the run log](WALKTHROUGH.md#run-log) for which runs certified what):
 
@@ -421,11 +421,11 @@ Two short papers in journal format, written for an academic reader with no names
 
 **What has been checked so far.** Every Comparator run is listed, with its outcome, in the [run log](WALKTHROUGH.md#run-log). In short:
 
-* **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 24 theorems up to step 11 ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean)). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
+* **The built-in challenge "There Are Infinitely Many Primes"** has passed, most recently on 18 November 2026 with all 27 theorems, including the window theorems ([`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean), run 9). The challenge is the site's own, so its statement did not have to be trusted by us, and a pass also means every other proof in the file compiled.
 
   ![Comparator Live: InfinitudeOfPrimes verified](docs/img/comparator-infinitude-success.png)
 
-* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 19 theorems. It passed on Comparator for the first 6. The rest, including the window theorems added on 17 November 2026, compile with no errors against Mathlib on our machine and use only Lean's three standard axioms; their Comparator run is still to be done.
+* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 19 theorems. It passed on Comparator for the first 6 (run 1). All 19 are also covered by run 9, in which the whole file compiled on Comparator; they use only Lean's three standard axioms.
 
 **What verification does and does not give.**
 

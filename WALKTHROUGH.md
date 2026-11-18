@@ -398,7 +398,7 @@ The zeta function takes a number s and returns ζ(s) = 1 + 1/2^s + 1/3^s + ... E
 2. `multiplier_range`: the program's start and stop values, `max(p, (a + p − 1) / p)` and `b / p`, are exactly "p ≤ k and a ≤ p × k ≤ b".
 3. `window_sieve`: in any window [a, b], the numbers that end in 1, 3, 7 or 9, are above 5 and are not crossed out are exactly the primes in [max(a, 6), b].
 
-Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61d), using only Lean's three standard axioms. `Challenge.lean` and `config.json` now name 19 theorems. Status: ESTABLISHED locally; Comparator run PENDING.
+Result: compiled with 0 errors against Mathlib (Lean 4.34, Mathlib commit 818f61d), using only Lean's three standard axioms. `Challenge.lean` and `config.json` now name 19 theorems. Status: ESTABLISHED, locally and on Comparator Live (run 9, 18 November 2026).
 
 **Step 3: corrections carried into the papers.**
 * The counting formula (Legendre on the 40%) needs x ≥ 25. Below 25 it is right only at x = 4 (checked for every x from 2 to 3,000).
@@ -464,7 +464,7 @@ Status: ESTABLISHED by this run for steps 1 to 3; step 4 is the known limit of s
 
 File: [`lean/Solution.lean`](lean/Solution.lean). Challenge statements: [`lean/Challenge.lean`](lean/Challenge.lean). Checker settings: [`lean/config.json`](lean/config.json).
 
-Status: stages L1 to L5 are ESTABLISHED on Comparator Live (runs 1, 2, 4 and 8 of the run log below; run 8 on 18 November 2026 covered everything up to step 11). Stage L6, the three window theorems, compiles with no errors against a local Mathlib (ESTABLISHED locally); its Comparator run is PENDING.
+Status: all stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 9 of the run log below; run 9 on 18 November 2026 compiled all 27 theorems, including the window theorems).
 
 | Stage | Added | What it proves |
 |---|---|---|
@@ -503,6 +503,7 @@ Status: stages L1 to L5 are ESTABLISHED on Comparator Live (runs 1, 2, 4 and 8 o
 | local | (compile only) | L5 version: full `Solution.lean` and `Challenge.lean` (16 theorems) compiled against Mathlib (build files from `lake exe cache get`, Lean 4.34) | No errors; cross-check `true`; benchmark ALL 4 CHECKS PASSED |
 | 7 | Built-in "There Are Infinitely Many Primes" | L5 version | Covered by run 8 |
 | 8 | Built-in "There Are Infinitely Many Primes" | [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (SHA-256 886b839d...): all 24 theorems up to step 11, with the `#eval` lines switched off; does not yet contain the three window theorems | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled, including the fixed `prime_mod30` |
+| 9 | Built-in "There Are Infinitely Many Primes" | Updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean): all 27 theorems, including `mul_coprime_ten`, `multiplier_range` and `window_sieve` | **Passed**, 18 November 2026 (Lean v4.36, latest Mathlib). Every proof in the file compiled |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
 All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
@@ -511,7 +512,6 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 
 ## What is still open
 
-* The window theorems (L6) must be run on Comparator: paste the updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (27 theorems, compiled locally with no errors on 18 November 2026).
 * The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof. Route: rewrite its loops without `while`, prove a loop invariant.
 * The counting formula (Legendre on the 40%) is checked by computation only; it holds for every x ≥ 25 and, below 25, only at x = 4.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.

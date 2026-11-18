@@ -178,7 +178,7 @@ which is prime to $10$, so the first element of $\Mult_7$ is $7\cdot 1\,428\,571
 
 \section{Formal verification}\label{sec:formal}
 
-The statements of Section~\ref{sec:window} have been formalised in Lean~4 \cite{Lean4} using Mathlib \cite{Mathlib2020}. The file compiles without errors under Lean v4.34.0-rc1 with the Mathlib revision of 17 August 2026 (commit \texttt{818f61d}), and the command \lean{\#print axioms} reports that the three window results depend only on \lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}, the standard axioms of Lean's logic. Table~\ref{tab:lean} matches the results of this paper to their Lean names.
+The statements of Section~\ref{sec:window} have been formalised in Lean~4 \cite{Lean4} using Mathlib \cite{Mathlib2020}. The file compiles without errors under Lean v4.34.0-rc1 with the Mathlib revision of 17 August 2026 (commit \texttt{818f61d}), and under Lean v4.36.0 with the current Mathlib on the Comparator Live service of the Lean project (18 November 2026), and the command \lean{\#print axioms} reports that the three window results depend only on \lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}, the standard axioms of Lean's logic. Table~\ref{tab:lean} matches the results of this paper to their Lean names.
 
 \begin{table}[ht]
 \centering
