@@ -1,0 +1,42 @@
+Output of lean/check_axioms.sh, 18 November 2026 (Lean 4.34, Mathlib 818f61d)
+
+sorry occurrences: 0
+axiom declarations: 0
+'prime_ending' depends on axioms: [propext, Quot.sound]
+'prime_mod30' depends on axioms: [propext, Quot.sound]
+'removed_not_prime' depends on axioms: [propext, Quot.sound]
+'smallest_factor_le_sqrt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'candidate_prime_above' depends on axioms: [propext, Classical.choice, Quot.sound]
+'infinitely_many_ending' depends on axioms: [propext, Classical.choice, Quot.sound]
+'survives_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'mem_primesSpec' depends on axioms: [propext, Classical.choice, Quot.sound]
+'survivor_count' depends on axioms: [propext, Classical.choice, Quot.sound]
+'survivesBelow_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'filter_survivesBelow' depends on axioms: [propext, Classical.choice, Quot.sound]
+'prime_count_100' depends on axioms: [propext, Classical.choice, Quot.sound]
+'prime_count_1000' depends on axioms: [propext, Classical.choice, Quot.sound]
+'prime_count_10000' depends on axioms: [propext, Classical.choice, Quot.sound]
+'sqrt_rule' depends on axioms: [propext, Classical.choice, Quot.sound]
+'square_not_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'square_needs_p' depends on axioms: [propext, Classical.choice, Quot.sound]
+'three_seven_enough' depends on axioms: [propext, Classical.choice, Quot.sound]
+'three_seven_fails_at_121' depends on axioms: [propext]
+'left37_100' does not depend on any axioms
+'left37_120' does not depend on any axioms
+'left37_121' does not depend on any axioms
+'mul_coprime_ten' depends on axioms: [propext, Quot.sound]
+'multiplier_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+'window_sieve' depends on axioms: [propext, Classical.choice, Quot.sound]
+'known_primes_reach' depends on axioms: [propext, Classical.choice, Quot.sound]
+'bootstrap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'known_primes_not_enough' depends on axioms: [propext, Classical.choice, Quot.sound]
+'InfinitudeOfPrimes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'density_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'prime_97' depends on axioms: [propext, Classical.choice, Quot.sound]
+'not_prime_91' depends on axioms: [propext]
+'candidateCount_100' does not depend on any axioms
+'candidateCount_1e10' depends on axioms: [propext]
+'candidateCount_1000' does not depend on any axioms
+'candidateCount_10000' does not depend on any axioms
+'record_digits' depends on axioms: [propext]
+'first_exponent_100M' depends on axioms: [propext]

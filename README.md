@@ -389,7 +389,13 @@ File: [`lean/Solution.lean`](lean/Solution.lean). Compiled with no errors agains
 
 ### Certified on Comparator Live: the latest runs
 
-All three runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib. The certificate names `InfinitudeOfPrimes`, the site's statement. To check that one theorem, Comparator must first compile the whole solution file, so a pass also means that every other proof in the file was checked by Lean: a single wrong step anywhere would have stopped the build.
+All three runs used the site's own built-in challenge, "There Are Infinitely Many Primes", on Lean v4.36 with the latest Mathlib.
+
+**What a pass proves, precisely.**
+* **Certified by name: only `InfinitudeOfPrimes`.** Comparator checks that it proves exactly the site's statement, using only Lean's standard axioms.
+* **Compiled: the whole file.** Comparator has to build the file first, so a pass also means no proof in it contains an error.
+* **Not checked by Comparator: the other theorems' axioms.** A theorem left unfinished with `sorry`, or resting on an extra `axiom`, would still compile with only a warning. So for the other theorems we check two more things ourselves, with [`lean/check_axioms.sh`](lean/check_axioms.sh) ([output](results/lean_axioms.txt)): the file contains **no `sorry` and no `axiom` declaration**, and Lean's `#print axioms` shows that **all 38 theorems use only the standard axioms** (`propext`, `Quot.sound`, `Classical.choice`), with no `sorryAx` and no `native_decide`.
+* To have Comparator certify every theorem by name, the local challenge ([`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json)) can be run instead; it lists 26 theorems.
 
 **Run 8, 18 November 2026: 24 theorems**
 
@@ -540,7 +546,7 @@ Two short papers in journal format, written for an academic reader, are in [`pap
 
   Screenshots of the two latest runs, with their code and what each proved, are in [Certified on Comparator Live](#certified-on-comparator-live-the-latest-runs).
 
-* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 22 theorems. It passed on Comparator for the first 6 (run 1). All 22 are also covered by run 10, in which the whole file compiled on Comparator; they use only Lean's three standard axioms.
+* **The local challenge** [`lean/Challenge.lean`](lean/Challenge.lean) with [`lean/config.json`](lean/config.json) now names 26 theorems. It passed on Comparator for the first 6 (run 1). The rest compiled inside the passing runs, and [`lean/check_axioms.sh`](lean/check_axioms.sh) confirms that none uses `sorry` or any axiom beyond the standard three.
 
 **What verification does and does not give.**
 

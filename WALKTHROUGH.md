@@ -543,7 +543,7 @@ Status: stages L1 to L6 are ESTABLISHED on Comparator Live (runs 1, 2, 4, 8 and 
 | local | (compile only) | L7 version: adds `known_primes_reach`, `bootstrap`, `known_primes_not_enough`; 30 theorems, `Challenge.lean` and `config.json` list 22 | No errors; only the standard axioms. Then passed on Comparator as run 10 |
 | local | (compile only) | L6 version: adds the window theorems; `Challenge.lean` and `config.json` now list 19 theorems | No errors; `#print axioms window_sieve` shows only `propext`, `Classical.choice`, `Quot.sound` |
 
-All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge also means the whole file compiled, so every proof in it was checked by the Lean kernel; Comparator's certificate itself names only `InfinitudeOfPrimes`. Running the local challenge would add all 11 theorems to the certificate.
+All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass against the built-in challenge certifies `InfinitudeOfPrimes` by name and shows that the whole file compiled with no errors. It does not by itself rule out a `sorry` or an extra `axiom` in another theorem (those compile with a warning), so that is checked separately by [`lean/check_axioms.sh`](lean/check_axioms.sh): no `sorry`, no `axiom` declaration, and all 38 theorems depend only on the standard axioms ([output](results/lean_axioms.txt), 18 November 2026).
 
 ---
 
