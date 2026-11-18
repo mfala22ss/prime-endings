@@ -16,6 +16,8 @@ Main results:
   and each prime is needed from its square on.
 * `three_seven_enough`, `three_seven_fails_at_121`: on the 40%, 3 and 7 alone leave exactly the
   primes up to 120, and first fail at 121 = 11 × 11.
+* `mul_coprime_ten`, `multiplier_range`, `window_sieve`: the sieve on any window `[a, b]`,
+  started at `max p ⌈a/p⌉` for each sieving prime, keeps exactly the primes in `[max a 6, b]`.
 
 Computation: `report a b g` lists the primes in `[a, b]` together with summary statistics.
 Windows with `√b ≤ 2·10⁶` are sieved exactly. Larger windows are pre-sieved by all primes up to
@@ -215,6 +217,75 @@ def left37 (x : ℕ) : ℕ := (N x - 2) - (N (x / 3) + N (x / 7) - N (x / 21) - 
 theorem left37_100 : left37 100 = 22 := by decide
 theorem left37_120 : left37 120 = 27 := by decide
 theorem left37_121 : left37 121 = 28 := by decide
+
+/-! ## The sieve on an arbitrary window `[a, b]` -/
+
+/-- Lemma 1: for `p` coprime to 10, `p * k` is coprime to 10 exactly when `k` is. -/
+theorem mul_coprime_ten {p k : ℕ} (hp : Nat.Coprime p 10) :
+    Nat.Coprime (p * k) 10 ↔ Nat.Coprime k 10 := by
+  rw [Nat.Coprime, Nat.Coprime, Nat.Coprime.gcd_mul_left_cancel k hp]
+
+/-- The multiplier range of Definition 3: `max p ⌈a/p⌉ ≤ k ≤ ⌊b/p⌋` says exactly that
+    `p ≤ k` and `a ≤ p * k ≤ b`. -/
+theorem multiplier_range {a b p k : ℕ} (hp : 0 < p) :
+    (max p ((a + p - 1) / p) ≤ k ∧ k ≤ b / p) ↔ (p ≤ k ∧ a ≤ p * k ∧ p * k ≤ b) := by
+  rw [max_le_iff, Nat.div_le_iff_le_mul_add_pred hp, Nat.le_div_iff_mul_le hp]
+  rw [show k * p = p * k from mul_comm k p]
+  generalize p * k = m
+  omega
+
+/-- `n` is crossed out in the window `[a, b]`: `n = p * k` for a sieving prime
+    `3 ≤ p`, `p ≠ 5`, `p * p ≤ b`, and a multiplier `k` coprime to 10 with
+    `max p ⌈a/p⌉ ≤ k ≤ ⌊b/p⌋`. -/
+def CrossedOut (a b n : ℕ) : Prop :=
+  ∃ p k, p.Prime ∧ 3 ≤ p ∧ p ≠ 5 ∧ p * p ≤ b ∧ Nat.Coprime k 10 ∧
+    max p ((a + p - 1) / p) ≤ k ∧ k ≤ b / p ∧ p * k = n
+
+/-- Theorem 1 (sieve identity on any window). For `1 ≤ a ≤ b`, a number `n` is a candidate in
+    `[a, b]` (above 5, coprime to 10) that is not crossed out exactly when `n` is a prime with
+    `max a 6 ≤ n ≤ b`. -/
+theorem window_sieve (a b n : ℕ) :
+    (a ≤ n ∧ n ≤ b ∧ 5 < n ∧ Nat.Coprime n 10 ∧ ¬ CrossedOut a b n) ↔
+      (n.Prime ∧ max a 6 ≤ n ∧ n ≤ b) := by
+  constructor
+  · rintro ⟨ha, hb, h5, hc, hno⟩
+    refine ⟨?_, max_le ha (by omega), hb⟩
+    by_contra hnp
+    set q := n.minFac with hq
+    have hqp : q.Prime := Nat.minFac_prime (by omega)
+    have hsq : q ^ 2 ≤ n := Nat.minFac_sq_le_self (by omega) hnp
+    obtain ⟨k, hk⟩ : q ∣ n := Nat.minFac_dvd n
+    have hq2 : q ≠ 2 := by
+      intro h; rw [h] at hk; have := Nat.Coprime.coprime_dvd_left (Dvd.intro k hk.symm) hc
+      norm_num at this
+    have hq5 : q ≠ 5 := by
+      intro h; rw [h] at hk; have := Nat.Coprime.coprime_dvd_left (Dvd.intro k hk.symm) hc
+      norm_num at this
+    have hq3 : 3 ≤ q := by have := hqp.two_le; omega
+    have hkq : q ≤ k := by
+      have hk1 : k ≠ 1 := by intro h; rw [h, mul_one] at hk; exact hnp (hk ▸ hqp)
+      have hk0 : k ≠ 0 := by intro h; rw [h, mul_zero] at hk; omega
+      have := Nat.minFac_le_of_dvd (Nat.minFac_prime hk1).two_le
+        ((Nat.minFac_dvd k).trans (Dvd.intro_left q hk.symm))
+      exact this.trans (Nat.minFac_le (by omega))
+    have hqpos : 0 < q := hqp.pos
+    have hkc : Nat.Coprime k 10 := (mul_coprime_ten
+      (Nat.Coprime.coprime_dvd_left (Dvd.intro k hk.symm) hc)).1 (hk ▸ hc)
+    have hr := (multiplier_range (a := a) (b := b) (k := k) hqpos).2
+      ⟨hkq, by omega, by omega⟩
+    exact hno ⟨q, k, hqp, hq3, hq5, by nlinarith, hkc, hr.1, hr.2, hk.symm⟩
+  · rintro ⟨hp, hmax, hb⟩
+    have ha : a ≤ n := le_of_max_le_left hmax
+    have h5 : 5 < n := by have := le_of_max_le_right hmax; omega
+    refine ⟨ha, hb, h5, ?_, ?_⟩
+    · exact (Nat.Prime.coprime_iff_not_dvd hp).2 fun h => by
+        rcases (Nat.Prime.dvd_mul hp).mp (show n ∣ 2 * 5 from h) with h' | h' <;>
+          · have := Nat.le_of_dvd (by norm_num) h'; omega
+    · rintro ⟨p, k, hpp, hp3, -, -, -, hr, hk1, hpk⟩
+      have hpk' := ((multiplier_range hpp.pos).1 ⟨hr, hk1⟩).1
+      rcases hp.eq_one_or_self_of_dvd p (Dvd.intro k hpk) with h | h
+      · omega
+      · rw [h] at hpk'; have := hp.pos; nlinarith
 
 /-- Challenge definition (Comparator Live, "There Are Infinitely Many Primes"). -/
 def IsPrime (n : Nat) := 1 < n ∧ ∀ k, 1 < k → k < n → ¬ k ∣ n

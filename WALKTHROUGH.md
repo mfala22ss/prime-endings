@@ -511,7 +511,7 @@ All runs used Comparator Live with Lean v4.36 and the latest Mathlib. A pass aga
 
 ## What is still open
 
-* The window theorems (L6) must be run on Comparator: paste the full `lean/Solution.lean`.
+* The window theorems (L6) must be run on Comparator: paste the updated [`lean/SolutionProofsOnly.lean`](lean/SolutionProofsOnly.lean) (27 theorems, compiled locally with no errors on 18 November 2026).
 * The fast array sieve used for reports is compared with the proved reference sieve by computation (up to 3,000), not by proof. Route: rewrite its loops without `while`, prove a loop invariant.
 * The counting formula (Legendre on the 40%) is checked by computation only; it holds for every x ≥ 25 and, below 25, only at x = 4.
 * The 2.5 / (ln x − 1) share is measured and matches the prime number theorem but is not proved in Lean.
